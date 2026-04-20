@@ -17,9 +17,7 @@
       :root { --t1: #f3f4f6; --t2: #9ca3af; --bg1: #111827; --bg2: #1f2937; --br: rgba(255,255,255,.08); }
     }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg1); color: var(--t1); min-height: 100vh; padding: 2rem 1.5rem; }
-    .container { max-width: 900px; margin: 0 auto; }
-    h1 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
-    .sub { font-size: 12px; color: var(--t2); margin-bottom: 1.5rem; }
+    .container { max-width: 1000px; margin: 0 auto; }
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .g3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
     .dz { border: 1.5px dashed #d1d5db; border-radius: var(--r-lg); padding: 2rem 1.5rem; text-align: center; cursor: pointer; background: var(--bg2); user-select: none; transition: background .12s; }
@@ -44,7 +42,10 @@
     .tab-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
     .stab { font-size: 11px; padding: 4px 12px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
     .stab:hover { color: var(--t1); } .stab.on { background: var(--t1); color: var(--bg1); border-color: transparent; }
-    .view-toggle { display: flex; gap: 6px; margin-bottom: 16px; }
+    .top-nav { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 0.5px solid var(--br); padding-bottom: 12px; }
+    .tnav { font-size: 13px; font-weight: 500; padding: 6px 18px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
+    .tnav:hover { color: var(--t1); } .tnav.on { background: var(--t1); color: var(--bg1); border-color: transparent; }
+    .view-toggle { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
     .vtab { font-size: 12px; font-weight: 500; padding: 6px 16px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
     .vtab.on { background: var(--t1); color: var(--bg1); border-color: transparent; }
     .camp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -54,13 +55,12 @@
     .camp-tbl td.num { text-align: right; font-family: var(--m); font-size: 11px; }
     .camp-tbl tr:last-child td { border-bottom: none; }
     .camp-tbl tr:hover td { background: var(--bg2); }
-    .cname { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+    .cname { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
     .delta-pill { display: inline-block; font-size: 10px; font-family: var(--m); padding: 2px 6px; border-radius: 6px; }
     .pill-pos { background: #f0fdf4; color: var(--s); } .pill-neg { background: #fef2f2; color: var(--d); } .pill-neu { background: var(--bg2); color: var(--t2); }
     .tbl-wrap { overflow-x: auto; border-radius: var(--r-lg); border: 0.5px solid var(--br); }
     .tbl-note { font-size: 10px; color: var(--t2); margin-top: 6px; text-align: right; }
     .seg-toggle { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; padding: 2px 6px; border-radius: 8px; border: 0.5px solid var(--br); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; transition: all .1s; white-space: nowrap; }
-    .seg-toggle:hover { border-color: #d1d5db; }
     .seg-toggle.st-all { background: transparent; color: var(--t2); }
     .seg-toggle.st-b { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
     .seg-toggle.st-nb { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
@@ -77,7 +77,7 @@
     .pf-chevron.open { transform: rotate(180deg); }
     .pf-body { display: none; padding: 0 14px 12px; }
     .pf-body.open { display: block; }
-    .pf-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin: 10px 0; }
+    .pf-stats { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin: 10px 0; }
     .pf-stat { background: var(--bg1); border-radius: var(--r-md); padding: 10px 12px; border: 0.5px solid var(--br); }
     .pf-stat-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: var(--t2); margin-bottom: 4px; }
     .pf-stat-val { font-size: 15px; font-weight: 500; font-family: var(--m); color: var(--t1); }
@@ -85,212 +85,231 @@
     .warn { background: #fffbeb; border: 0.5px solid #fcd34d; border-radius: var(--r-md); padding: 10px 14px; font-size: 12px; color: #78350f; margin-top: 10px; }
     .err  { background: #fef2f2; border: 0.5px solid #fca5a5; border-radius: var(--r-md); padding: 10px 14px; font-size: 12px; color: #7f1d1d; margin-top: 10px; }
     .rst-btn { font-size: 11px; padding: 3px 10px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
-    .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; } .mt-24 { margin-top: 24px; }
-    @media (max-width: 580px) { .g3 { grid-template-columns: repeat(2,1fr); } .pf-stats { grid-template-columns: repeat(2,1fr); } .g2 { grid-template-columns: 1fr; } }
+    .hint-box { font-size: 10px; color: var(--t2); background: var(--bg2); border-radius: var(--r-md); padding: 8px 12px; margin-top: 10px; font-family: var(--m); line-height: 1.8; }
+    @media (max-width: 600px) { .g3 { grid-template-columns: repeat(2,1fr); } .pf-stats { grid-template-columns: repeat(2,1fr); } .g2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <div id="upload-view">
-    <h1>WoW Campaign Comparator</h1>
-    <p class="sub">Upload prior week first, then current week. Supports Amazon campaign performance CSV exports.</p>
-    <div class="g2">
-      <div class="dz" id="dz-prior" onclick="document.getElementById('f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();load('prior',event.dataTransfer.files[0])">
-        <input type="file" id="f-prior" accept=".csv" style="display:none" onchange="load('prior',this.files[0])">
-        <div style="font-size:22px;margin-bottom:8px">📅</div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="lbl-prior">Prior week</div>
-        <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+    <p style="font-size:18px;font-weight:500" id="app-title">WoW Comparator</p>
+  </div>
+  <div class="top-nav">
+    <button class="tnav on" id="tnav-campaigns" onclick="switchSection('campaigns')">Campaigns</button>
+    <button class="tnav"    id="tnav-asins"     onclick="switchSection('asins')">ASINs</button>
+  </div>
+
+  <!-- ═══ CAMPAIGNS ═══ -->
+  <div id="section-campaigns">
+    <div id="c-upload-view">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:1rem">Upload prior week first, then current week.</p>
+      <div class="g2">
+        <div class="dz" id="c-dz-prior" onclick="document.getElementById('c-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();cLoad('prior',event.dataTransfer.files[0])">
+          <input type="file" id="c-f-prior" accept=".csv" style="display:none" onchange="cLoad('prior',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="c-lbl-prior">Prior week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+        <div class="dz" id="c-dz-cur" onclick="document.getElementById('c-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();cLoad('cur',event.dataTransfer.files[0])">
+          <input type="file" id="c-f-cur" accept=".csv" style="display:none" onchange="cLoad('cur',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="c-lbl-cur">Current week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
       </div>
-      <div class="dz" id="dz-cur" onclick="document.getElementById('f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();load('cur',event.dataTransfer.files[0])">
-        <input type="file" id="f-cur" accept=".csv" style="display:none" onchange="load('cur',this.files[0])">
-        <div style="font-size:22px;margin-bottom:8px">📊</div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="lbl-cur">Current week</div>
-        <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+    </div>
+
+    <div id="c-results-view" style="display:none;padding-bottom:2rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
+        <div>
+          <p style="font-size:16px;font-weight:500" id="c-brand-display"></p>
+          <p style="font-size:11px;color:var(--t2);margin-top:2px" id="c-results-sub"></p>
+        </div>
+        <button class="rst-btn" onclick="cReset()">↺ Reset</button>
       </div>
+      <div class="view-toggle" style="margin-top:1rem">
+        <button class="vtab on" id="c-view-metrics"   onclick="cSetView('metrics')">Metrics</button>
+        <button class="vtab"    id="c-view-campaign"  onclick="cSetView('campaign')">Campaigns</button>
+        <button class="vtab"    id="c-view-portfolio" onclick="cSetView('portfolio')">Portfolios</button>
+      </div>
+
+      <div id="c-metrics-view">
+        <div class="chg-card" style="margin-bottom:12px">
+          <div class="chg-lbl">Revenue & spend — prior → current</div>
+          <div class="chg-row"><span class="chg-name">Ad Revenue</span><div class="chg-right"><div class="big" id="c-rev-pct">—</div><div class="small" id="c-rev-abs"></div></div></div>
+          <div class="chg-row"><span class="chg-name">Ad Spend</span><div class="chg-right"><div class="big" id="c-spend-pct">—</div><div class="small" id="c-spend-abs"></div></div></div>
+        </div>
+        <div class="slbl">ROAS</div>
+        <div class="g3" style="margin-bottom:12px">
+          <div class="metric-card"><div class="mc-lbl">Overall <span class="seg-badge badge-all">all</span></div><div class="mc-val" id="c-all-roas-cur">—</div><div class="mc-prior" id="c-all-roas-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">Branded <span class="seg-badge badge-b">| b |</span></div><div class="mc-val" id="c-b-roas-cur">—</div><div class="mc-prior" id="c-b-roas-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">Non-branded <span class="seg-badge badge-nb">| nb |</span></div><div class="mc-val" id="c-nb-roas-cur">—</div><div class="mc-prior" id="c-nb-roas-prior"></div></div>
+        </div>
+        <div class="slbl">Conversion rate — orders ÷ clicks</div>
+        <div class="g3" style="margin-bottom:12px">
+          <div class="metric-card"><div class="mc-lbl">Overall <span class="seg-badge badge-all">all</span></div><div class="mc-val" id="c-all-cvr-cur">—</div><div class="mc-prior" id="c-all-cvr-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">Branded <span class="seg-badge badge-b">| b |</span></div><div class="mc-val" id="c-b-cvr-cur">—</div><div class="mc-prior" id="c-b-cvr-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">Non-branded <span class="seg-badge badge-nb">| nb |</span></div><div class="mc-val" id="c-nb-cvr-cur">—</div><div class="mc-prior" id="c-nb-cvr-prior"></div></div>
+        </div>
+        <div class="slbl">Volume</div>
+        <div class="g3" style="margin-bottom:12px">
+          <div class="metric-card"><div class="mc-lbl">Impressions</div><div class="mc-val" id="c-impr-cur">—</div><div class="mc-prior" id="c-impr-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">Clicks</div><div class="mc-val" id="c-clicks-cur">—</div><div class="mc-prior" id="c-clicks-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">Orders</div><div class="mc-val" id="c-orders-cur">—</div><div class="mc-prior" id="c-orders-prior"></div></div>
+        </div>
+        <div class="slbl">CPCs</div>
+        <div class="g2">
+          <div class="metric-card"><div class="mc-lbl">Branded CPC <span class="seg-badge badge-b">| b |</span></div><div class="mc-val" id="c-b-cpc-cur">—</div><div class="mc-prior" id="c-b-cpc-prior"></div></div>
+          <div class="metric-card"><div class="mc-lbl">NB CPC <span class="seg-badge badge-nb">| nb |</span></div><div class="mc-val" id="c-nb-cpc-cur">—</div><div class="mc-prior" id="c-nb-cpc-prior"></div></div>
+        </div>
+      </div>
+
+      <div id="c-campaign-view" style="display:none">
+        <div class="tab-row">
+          <button class="stab on" id="c-tab-spend" onclick="cSetSort('spend')">By spend</button>
+          <button class="stab" id="c-tab-rev"  onclick="cSetSort('rev')">By revenue</button>
+          <button class="stab" id="c-tab-roas" onclick="cSetSort('roas')">By ROAS</button>
+          <button class="stab" id="c-tab-cvr"  onclick="cSetSort('cvr')">By CVR</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="camp-tbl">
+            <thead><tr>
+              <th>Campaign</th>
+              <th><span class="seg-toggle st-all" id="c-seg-toggle" onclick="cCycleSeg()"><span id="c-seg-label">Seg</span> <span style="opacity:.5">⇅</span></span></th>
+              <th class="num">Revenue</th><th class="num">Rev Δ</th>
+              <th class="num">Spend</th><th class="num">Spend Δ</th>
+              <th class="num">ROAS</th><th class="num">ROAS Δ</th>
+              <th class="num">CVR</th><th class="num">CVR Δ</th>
+            </tr></thead>
+            <tbody id="c-camp-body"></tbody>
+          </table>
+        </div>
+        <div class="tbl-note" id="c-tbl-note"></div>
+      </div>
+
+      <div id="c-portfolio-view" style="display:none">
+        <div class="tab-row">
+          <button class="stab on" id="c-ptab-spend" onclick="cSetPfSort('spend')">By spend</button>
+          <button class="stab" id="c-ptab-rev"  onclick="cSetPfSort('rev')">By revenue</button>
+          <button class="stab" id="c-ptab-roas" onclick="cSetPfSort('roas')">By ROAS</button>
+          <button class="stab" id="c-ptab-cvr"  onclick="cSetPfSort('cvr')">By CVR</button>
+        </div>
+        <div class="pf-group">
+          <div class="pf-group-lbl">Non-branded <span class="seg-badge badge-nb" style="vertical-align:middle">| nb |</span></div>
+          <div id="c-pf-list-nb"></div>
+        </div>
+        <div class="pf-group">
+          <div class="pf-group-lbl">Branded <span class="seg-badge badge-b" style="vertical-align:middle">| b |</span></div>
+          <div id="c-pf-list-b"></div>
+        </div>
+        <div class="pf-group" id="c-pf-group-other" style="display:none">
+          <div class="pf-group-lbl">Untagged</div>
+          <div id="c-pf-list-other"></div>
+        </div>
+      </div>
+      <div id="c-warn-area"></div>
     </div>
   </div>
 
-  <div id="results-view" style="display:none;padding-bottom:3rem">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-      <h1>Week-over-week summary</h1>
-      <button class="rst-btn" onclick="reset()">↺ Reset</button>
-    </div>
-    <p class="sub" id="results-sub"></p>
-
-    <div class="slbl mt-24">Revenue & spend</div>
-    <div class="chg-card mb-12">
-      <div class="chg-lbl">Prior → current</div>
-      <div class="chg-row"><span class="chg-name">Ad Revenue</span><div class="chg-right"><div class="big" id="rev-pct">—</div><div class="small" id="rev-abs"></div></div></div>
-      <div class="chg-row"><span class="chg-name">Ad Spend</span><div class="chg-right"><div class="big" id="spend-pct">—</div><div class="small" id="spend-abs"></div></div></div>
-    </div>
-
-    <div class="slbl">Conversion rate — orders ÷ clicks</div>
-    <div class="g3 mb-12">
-      <div class="metric-card"><div class="mc-lbl">Overall <span class="seg-badge badge-all">all</span></div><div class="mc-val" id="all-cvr-cur">—</div><div class="mc-prior" id="all-cvr-prior"></div></div>
-      <div class="metric-card"><div class="mc-lbl">Branded <span class="seg-badge badge-b">| b |</span></div><div class="mc-val" id="b-cvr-cur">—</div><div class="mc-prior" id="b-cvr-prior"></div></div>
-      <div class="metric-card"><div class="mc-lbl">Non-branded <span class="seg-badge badge-nb">| nb |</span></div><div class="mc-val" id="nb-cvr-cur">—</div><div class="mc-prior" id="nb-cvr-prior"></div></div>
-    </div>
-
-    <div class="slbl">Volume</div>
-    <div class="g3 mb-12">
-      <div class="metric-card"><div class="mc-lbl">Impressions</div><div class="mc-val" id="impr-cur">—</div><div class="mc-prior" id="impr-prior"></div></div>
-      <div class="metric-card"><div class="mc-lbl">Clicks</div><div class="mc-val" id="clicks-cur">—</div><div class="mc-prior" id="clicks-prior"></div></div>
-      <div class="metric-card"><div class="mc-lbl">Orders</div><div class="mc-val" id="orders-cur">—</div><div class="mc-prior" id="orders-prior"></div></div>
+  <!-- ═══ ASINS ═══ -->
+  <div id="section-asins" style="display:none">
+    <div id="a-upload-view">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:4px">Upload Sponsored Products advertised product reports.</p>
+      <p style="font-size:11px;color:var(--t2);margin-bottom:1rem">Prior week first, then current week. Metrics aggregated per ASIN across all campaigns.</p>
+      <div class="g2">
+        <div class="dz" id="a-dz-prior" onclick="document.getElementById('a-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('prior',event.dataTransfer.files[0])">
+          <input type="file" id="a-f-prior" accept=".csv" style="display:none" onchange="aLoad('prior',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="a-lbl-prior">Prior week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+        <div class="dz" id="a-dz-cur" onclick="document.getElementById('a-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('cur',event.dataTransfer.files[0])">
+          <input type="file" id="a-f-cur" accept=".csv" style="display:none" onchange="aLoad('cur',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="a-lbl-cur">Current week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+      </div>
     </div>
 
-    <div class="slbl">CPCs</div>
-    <div class="g2 mb-24">
-      <div class="metric-card"><div class="mc-lbl">Branded CPC <span class="seg-badge badge-b">| b |</span></div><div class="mc-val" id="b-cpc-cur">—</div><div class="mc-prior" id="b-cpc-prior"></div></div>
-      <div class="metric-card"><div class="mc-lbl">NB CPC <span class="seg-badge badge-nb">| nb |</span></div><div class="mc-val" id="nb-cpc-cur">—</div><div class="mc-prior" id="nb-cpc-prior"></div></div>
-    </div>
+    <div id="a-results-view" style="display:none;padding-bottom:2rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div>
+          <p style="font-size:16px;font-weight:500">ASIN performance</p>
+          <p style="font-size:11px;color:var(--t2);margin-top:2px" id="a-sub"></p>
+        </div>
+        <button class="rst-btn" onclick="aReset()">↺ Reset</button>
+      </div>
 
-    <div class="slbl">Campaigns</div>
-    <div class="view-toggle">
-      <button class="vtab on" id="view-campaign" onclick="setView('campaign')">By campaign</button>
-      <button class="vtab" id="view-portfolio" onclick="setView('portfolio')">By portfolio</button>
-    </div>
+      <div class="slbl">Portfolio totals</div>
+      <div class="g3" style="margin-bottom:12px">
+        <div class="metric-card"><div class="mc-lbl">Ad Revenue</div><div class="mc-val" id="a-rev-cur">—</div><div class="mc-prior" id="a-rev-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">Ad Spend</div><div class="mc-val" id="a-spend-cur">—</div><div class="mc-prior" id="a-spend-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">ROAS</div><div class="mc-val" id="a-roas-cur">—</div><div class="mc-prior" id="a-roas-prior"></div></div>
+      </div>
+      <div class="g3" style="margin-bottom:16px">
+        <div class="metric-card"><div class="mc-lbl">Orders</div><div class="mc-val" id="a-orders-cur">—</div><div class="mc-prior" id="a-orders-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">Clicks</div><div class="mc-val" id="a-clicks-cur">—</div><div class="mc-prior" id="a-clicks-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">CVR</div><div class="mc-val" id="a-cvr-cur">—</div><div class="mc-prior" id="a-cvr-prior"></div></div>
+      </div>
 
-    <div id="campaign-view">
       <div class="tab-row">
-        <button class="stab on" id="tab-spend" onclick="setSort('spend')">By spend</button>
-        <button class="stab" id="tab-rev" onclick="setSort('rev')">By revenue</button>
-        <button class="stab" id="tab-cvr" onclick="setSort('cvr')">By CVR</button>
+        <button class="stab on" id="a-tab-rev"    onclick="aSetSort('rev')">By revenue</button>
+        <button class="stab"    id="a-tab-spend"  onclick="aSetSort('spend')">By spend</button>
+        <button class="stab"    id="a-tab-roas"   onclick="aSetSort('roas')">By ROAS</button>
+        <button class="stab"    id="a-tab-orders" onclick="aSetSort('orders')">By orders</button>
+        <button class="stab"    id="a-tab-cvr"    onclick="aSetSort('cvr')">By CVR</button>
       </div>
       <div class="tbl-wrap">
         <table class="camp-tbl">
           <thead><tr>
-            <th>Campaign</th>
-            <th><span class="seg-toggle st-all" id="seg-toggle" onclick="cycleSeg()" title="Filter by segment"><span id="seg-label">Seg</span> <span style="opacity:.5">⇅</span></span></th>
+            <th>ASIN</th>
+            <th>SKU</th>
             <th class="num">Revenue</th><th class="num">Rev Δ</th>
             <th class="num">Spend</th><th class="num">Spend Δ</th>
+            <th class="num">ROAS</th><th class="num">ROAS Δ</th>
+            <th class="num">Orders</th><th class="num">Orders Δ</th>
+            <th class="num">Clicks</th>
             <th class="num">CVR</th><th class="num">CVR Δ</th>
           </tr></thead>
-          <tbody id="camp-body"></tbody>
+          <tbody id="a-body"></tbody>
         </table>
       </div>
-      <div class="tbl-note" id="tbl-note"></div>
+      <div class="tbl-note" id="a-tbl-note"></div>
+      <div id="a-hint" class="hint-box" style="display:none"></div>
+      <div id="a-warn-area"></div>
     </div>
-
-    <div id="portfolio-view" style="display:none">
-      <div class="tab-row">
-        <button class="stab on" id="ptab-spend" onclick="setPfSort('spend')">By spend</button>
-        <button class="stab" id="ptab-rev" onclick="setPfSort('rev')">By revenue</button>
-        <button class="stab" id="ptab-cvr" onclick="setPfSort('cvr')">By CVR</button>
-      </div>
-      <div class="pf-group">
-        <div class="pf-group-lbl">Non-branded <span class="seg-badge badge-nb" style="vertical-align:middle">| nb |</span></div>
-        <div id="pf-list-nb"></div>
-      </div>
-      <div class="pf-group">
-        <div class="pf-group-lbl">Branded <span class="seg-badge badge-b" style="vertical-align:middle">| b |</span></div>
-        <div id="pf-list-b"></div>
-      </div>
-      <div class="pf-group" id="pf-group-other" style="display:none">
-        <div class="pf-group-lbl">Untagged</div>
-        <div id="pf-list-other"></div>
-      </div>
-    </div>
-
-    <div id="warn-area"></div>
   </div>
+
 </div>
-
 <script>
-const parsed={cur:null,prior:null};
-let allCampaigns=[],portfoliosNB=[],brandedPortfolio=null,portfoliosOther=[];
-let sortKey='spend',segFilter='all',pfSortKey='spend',pfIdx=0;
-
-const SEG_CYCLE=['all','b','nb'],SEG_LABELS={all:'Seg',b:'B',nb:'NB'},SEG_CLS={all:'st-all',b:'st-b',nb:'st-nb'};
-function cycleSeg(){
-  segFilter=SEG_CYCLE[(SEG_CYCLE.indexOf(segFilter)+1)%SEG_CYCLE.length];
-  const t=document.getElementById('seg-toggle');
-  t.className='seg-toggle '+SEG_CLS[segFilter];
-  document.getElementById('seg-label').textContent=SEG_LABELS[segFilter];
-  renderTable();
-}
-
+/* ─── Shared utils ─────────────────────────────────────────── */
 function findCol(h,kws,exc){
   const hl=h.map(x=>(x||'').toLowerCase().trim());
   const i=hl.findIndex(hh=>{if((exc||[]).some(e=>hh.includes(e)))return false;return kws.some(k=>hh.includes(k));});
   return i>=0?h[i]:null;
 }
 function pn(v){if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[$,%\s]/g,''));return isNaN(n)?0:n;}
-const isB=n=>(n||'').toLowerCase().includes('| b |');
-const isNB=n=>(n||'').toLowerCase().includes('| nb |');
-const segLbl=n=>isB(n)?'b':isNB(n)?'nb':null;
-function getPf(name){const p=(name||'').split('|');return p.length>=2?p[1].trim():'Other';}
-
-function extract(res){
-  const h=res.meta.fields||[],rows=res.data;
-  const nc=findCol(h,['campaign name'],[]);
-  const sc=findCol(h,['total cost (converted)','total cost','spend','cost'],['per click','cpc','acos','of sale']);
-  const rc=findCol(h,['sales (converted)','7 day total sales','14 day total sales','total sales','attributed sales','revenue','sales'],['(#)','unit','units','new-to-brand','new to brand','percentage','acos']);
-  const cc=findCol(h,['clicks'],[]);
-  const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
-  const ic=findCol(h,['impressions'],[]);
-  const seg={all:{cl:0,or:0},b:{cl:0,or:0,sp:0},nb:{cl:0,or:0,sp:0}};
-  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0;
-  const by={};
-  for(const r of rows){
-    const nm=nc?(r[nc]||'').trim():'';if(!nm)continue;
-    const cl=pn(r[cc]),or=pn(r[oc]),sp=pn(r[sc]),rv=pn(r[rc]),im=pn(r[ic]);
-    tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;tIm+=im;
-    seg.all.cl+=cl;seg.all.or+=or;
-    if(isB(nm)){seg.b.cl+=cl;seg.b.or+=or;seg.b.sp+=sp;}
-    if(isNB(nm)){seg.nb.cl+=cl;seg.nb.or+=or;seg.nb.sp+=sp;}
-    if(!by[nm])by[nm]={name:nm,cl:0,or:0,sp:0,rv:0};
-    by[nm].cl+=cl;by[nm].or+=or;by[nm].sp+=sp;by[nm].rv+=rv;
-  }
-  for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.pf=getPf(c.name);}
-  const cvr=s=>s.cl>0?(s.or/s.cl)*100:null,cpc=s=>s.cl>0?s.sp/s.cl:null;
-  const ns=rows.map(r=>nc?(r[nc]||''):'');
-  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,sc,rc,cc,oc,ic,
-    all:{...seg.all,cvr:cvr(seg.all)},
-    b:{...seg.b,cvr:cvr(seg.b),cpc:cpc(seg.b),cnt:ns.filter(isB).length},
-    nb:{...seg.nb,cvr:cvr(seg.nb),cpc:cpc(seg.nb),cnt:ns.filter(isNB).length},by};
-}
-
-function joinC(cur,pr){
-  const all=new Set([...Object.keys(cur.by),...Object.keys(pr.by)]);
-  return Array.from(all).map(n=>({name:n,seg:segLbl(n),pf:getPf(n),cur:cur.by[n]||null,prior:pr.by[n]||null}))
-    .filter(c=>c.cur&&(c.cur.sp>0||c.cur.cl>0));
-}
-function buildNB(cs){
-  const m={};
-  for(const c of cs){const k=c.pf||'Other';if(!m[k])m[k]={name:k,cur:{cl:0,or:0,sp:0,rv:0},prior:{cl:0,or:0,sp:0,rv:0},campaigns:[]};
-    m[k].campaigns.push(c);
-    if(c.cur){m[k].cur.cl+=c.cur.cl;m[k].cur.or+=c.cur.or;m[k].cur.sp+=c.cur.sp;m[k].cur.rv+=c.cur.rv;}
-    if(c.prior){m[k].prior.cl+=c.prior.cl;m[k].prior.or+=c.prior.or;m[k].prior.sp+=c.prior.sp;m[k].prior.rv+=c.prior.rv;}
-  }
-  for(const p of Object.values(m)){p.cur.cvr=p.cur.cl>0?(p.cur.or/p.cur.cl)*100:null;p.prior.cvr=p.prior.cl>0?(p.prior.or/p.prior.cl)*100:null;}
-  return Object.values(m);
-}
-function buildB(cs){
-  const p={name:'Branded',cur:{cl:0,or:0,sp:0,rv:0},prior:{cl:0,or:0,sp:0,rv:0},campaigns:cs};
-  for(const c of cs){if(c.cur){p.cur.cl+=c.cur.cl;p.cur.or+=c.cur.or;p.cur.sp+=c.cur.sp;p.cur.rv+=c.cur.rv;}
-    if(c.prior){p.prior.cl+=c.prior.cl;p.prior.or+=c.prior.or;p.prior.sp+=c.prior.sp;p.prior.rv+=c.prior.rv;}}
-  p.cur.cvr=p.cur.cl>0?(p.cur.or/p.cur.cl)*100:null;
-  p.prior.cvr=p.prior.cl>0?(p.prior.or/p.prior.cl)*100:null;
-  return p;
-}
-
 const f$=v=>'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fP=v=>v.toFixed(2)+'%',fI=v=>Math.round(v).toLocaleString('en-US');
-const fPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%',fPp=v=>(v>=0?'+':'')+v.toFixed(2)+' pp';
+const fP=v=>v.toFixed(2)+'%',fR=v=>v.toFixed(2)+'x',fI=v=>Math.round(v).toLocaleString('en-US');
+const fPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%';
+const fPp=v=>(v>=0?'+':'')+v.toFixed(2)+' pp';
+const fRd=v=>(v>=0?'+':'')+v.toFixed(2)+'x';
 function pd(c,p){if(c===null||p===null)return null;if(p===0)return c>0?Infinity:0;return(c-p)/Math.abs(p)*100;}
-function cd(c,p){if(!c||!p)return null;return(c.cvr??0)-(p.cvr??0);}
-function pill(v,fn,gd){
-  if(v===null)return'<span class="delta-pill pill-neu">—</span>';
-  const g=gd===1?v>0:gd===-1?v<0:null,cls=g===null?'pill-neu':g?'pill-pos':'pill-neg';
-  return`<span class="delta-pill ${cls}">${!isFinite(v)?(v>0?'New':'—'):fn(v)}</span>`;
+function ad(c,p){if(c===null||p===null)return null;return c-p;}
+function roasD(c,p){if(!c||!p||c.roas===null||p.roas===null)return null;return c.roas-p.roas;}
+function cvrD(c,p){if(!c||!p)return null;return(c.cvr??0)-(p.cvr??0);}
+function pill(val,fn,gd){
+  if(val===null)return'<span class="delta-pill pill-neu">—</span>';
+  const g=gd===1?val>0:gd===-1?val<0:null,cls=g===null?'pill-neu':g?'pill-pos':'pill-neg';
+  return`<span class="delta-pill ${cls}">${!isFinite(val)?(val>0?'New':'—'):fn(val)}</span>`;
 }
-
 function rChange(pi,ai,cv,pv,fn,gd){
   const pe=document.getElementById(pi),ae=document.getElementById(ai);
   if(cv===null||pv===null){pe.textContent='n/a';pe.className='big neu';ae.textContent='no data';ae.className='small neu';return;}
-  const d=cv-pv,p=pv!==0?(d/Math.abs(pv))*100:Infinity;
-  pe.textContent=isFinite(p)?fPct(p):(d>0?'New':'—');ae.textContent=`${fn(pv)} → ${fn(cv)}`;
+  const d=cv-pv,p2=pv!==0?(d/Math.abs(pv))*100:Infinity;
+  pe.textContent=isFinite(p2)?fPct(p2):(d>0?'New':'—');ae.textContent=`${fn(pv)} → ${fn(cv)}`;
   const g=gd===1?d>0:gd===-1?d<0:null;pe.className='big '+(g===null?'neu':g?'pos':'neg');ae.className='small '+(g===null?'neu':g?'pos':'neg');
 }
 function rCard(ci,pi,cv,pv,fn,gd){
@@ -301,129 +320,223 @@ function rCard(ci,pi,cv,pv,fn,gd){
   const d=cv-pv,a=d>0?'↑':d<0?'↓':'→',g=gd===1?d>0:gd===-1?d<0:null;
   pe.textContent=`${a} ${fn(pv)} prior week`;pe.className=`mc-prior ${g===null?'neu':g?'pos':'neg'}`;
 }
-
-function renderTable(){
-  let cs=[...allCampaigns];
-  if(segFilter==='b')cs=cs.filter(c=>c.seg==='b');
-  if(segFilter==='nb')cs=cs.filter(c=>c.seg==='nb');
-  cs.sort((a,b)=>sortKey==='rev'?(b.cur?.rv||0)-(a.cur?.rv||0):sortKey==='spend'?(b.cur?.sp||0)-(a.cur?.sp||0):(b.cur?.cvr||0)-(a.cur?.cvr||0));
-  document.getElementById('camp-body').innerHTML=cs.map(c=>{
-    const rv=pd(c.cur?.rv,c.prior?.rv),sp=pd(c.cur?.sp,c.prior?.sp),cv=cd(c.cur,c.prior);
-    const sb=c.seg?`<span class="seg-badge badge-${c.seg}">${c.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
-    return`<tr><td><div class="cname" title="${c.name}">${c.name}</div></td><td>${sb}</td>
-      <td class="num">${c.cur?f$(c.cur.rv):'—'}</td><td class="num">${pill(rv,fPct,1)}</td>
-      <td class="num">${c.cur?f$(c.cur.sp):'—'}</td><td class="num">${pill(sp,fPct,0)}</td>
-      <td class="num">${c.cur?.cvr!=null?fP(c.cur.cvr):'—'}</td>
-      <td class="num">${cv!==null?pill(cv,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td></tr>`;
-  }).join('')||'<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--t2)">No campaigns match this filter.</td></tr>';
-  const lbl=sortKey==='rev'?'revenue':sortKey==='spend'?'spend':'CVR';
-  const sg=segFilter==='b'?'branded only':segFilter==='nb'?'non-branded only':'all segments';
-  document.getElementById('tbl-note').textContent=`${cs.length} active campaigns · ${sg} · sorted by ${lbl}`;
-}
-
-function pfBlock(pf,isB2){
-  const i=pfIdx++,c=pf.cur,p=pf.prior;
-  const rd=pd(c.rv,p.rv),sd=pd(c.sp,p.sp),cd2=c.cvr!==null&&p.cvr!==null?c.cvr-p.cvr:null;
-  const pl=(cv,pv,fn,d)=>{if(cv===null||pv===null)return'';const diff=cv-pv,a=diff>0?'↑':diff<0?'↓':'→',cl=d===1?(diff>0?'pos':'neg'):(diff<0?'pos':'neg');return`<div class="pf-stat-prior ${cl}">${a} ${fn(pv)} prior</div>`;};
-  const cr=pf.campaigns.sort((a,b)=>(b.cur?.sp||0)-(a.cur?.sp||0)).map(c2=>{
-    const r=pd(c2.cur?.rv,c2.prior?.rv),s=pd(c2.cur?.sp,c2.prior?.sp),cv=cd(c2.cur,c2.prior);
-    const sb=c2.seg?`<span class="seg-badge badge-${c2.seg}">${c2.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
-    return`<tr><td><div class="cname" title="${c2.name}">${c2.name}</div></td><td>${sb}</td>
-      <td class="num">${c2.cur?f$(c2.cur.rv):'—'}</td><td class="num">${pill(r,fPct,1)}</td>
-      <td class="num">${c2.cur?f$(c2.cur.sp):'—'}</td><td class="num">${pill(s,fPct,0)}</td>
-      <td class="num">${c2.cur?.cvr!=null?fP(c2.cur.cvr):'—'}</td>
-      <td class="num">${cv!==null?pill(cv,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td></tr>`;
-  }).join('');
-  return`<div class="pf-block${isB2?' is-b':''}">
-    <div class="pf-header" onclick="togglePf('pf-${i}')">
-      <div class="pf-name-row"><span class="pf-name">${pf.name}</span><span style="font-size:10px;color:var(--t2)">${pf.campaigns.length} campaign${pf.campaigns.length!==1?'s':''}</span></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="pf-summary"><span>${f$(c.rv)} rev ${pill(rd,fPct,1)}</span><span>${f$(c.sp)} spend ${pill(sd,fPct,0)}</span><span>${c.cvr!=null?fP(c.cvr):'-'} CVR ${cd2!==null?pill(cd2,fPp,1):'—'}</span></div>
-        <span class="pf-chevron" id="chev-${i}">▼</span>
-      </div>
-    </div>
-    <div class="pf-body" id="pf-${i}">
-      <div class="pf-stats">
-        <div class="pf-stat"><div class="pf-stat-lbl">Revenue</div><div class="pf-stat-val">${f$(c.rv)}</div>${pl(c.rv,p.rv,f$,1)}</div>
-        <div class="pf-stat"><div class="pf-stat-lbl">Spend</div><div class="pf-stat-val">${f$(c.sp)}</div>${pl(c.sp,p.sp,f$,-1)}</div>
-        <div class="pf-stat"><div class="pf-stat-lbl">CVR</div><div class="pf-stat-val">${c.cvr!=null?fP(c.cvr):'—'}</div>${pl(c.cvr,p.cvr,fP,1)}</div>
-        <div class="pf-stat"><div class="pf-stat-lbl">Orders</div><div class="pf-stat-val">${fI(c.or)}</div>${pl(c.or,p.or,fI,1)}</div>
-      </div>
-      <div class="tbl-wrap" style="margin-top:4px">
-        <table class="camp-tbl"><thead><tr><th>Campaign</th><th>Seg</th><th class="num">Revenue</th><th class="num">Rev Δ</th><th class="num">Spend</th><th class="num">Spend Δ</th><th class="num">CVR</th><th class="num">CVR Δ</th></tr></thead><tbody>${cr}</tbody></table>
-      </div>
-    </div>
-  </div>`;
-}
-
-function renderPortfolios(){
-  pfIdx=0;
-  const sf=(a,b)=>pfSortKey==='rev'?(b.cur.rv||0)-(a.cur.rv||0):pfSortKey==='spend'?(b.cur.sp||0)-(a.cur.sp||0):(b.cur.cvr||0)-(a.cur.cvr||0);
-  document.getElementById('pf-list-nb').innerHTML=[...portfoliosNB].sort(sf).map(p=>pfBlock(p,false)).join('');
-  document.getElementById('pf-list-b').innerHTML=brandedPortfolio&&brandedPortfolio.campaigns.length?pfBlock(brandedPortfolio,true):'<p style="font-size:12px;color:var(--t2);padding:8px 0">No branded campaigns found.</p>';
-  const og=document.getElementById('pf-group-other');
-  if(portfoliosOther.length){og.style.display='';document.getElementById('pf-list-other').innerHTML=[...portfoliosOther].sort(sf).map(p=>pfBlock(p,false)).join('');}
-  else og.style.display='none';
-}
-
-function togglePf(id){const b=document.getElementById(id),i=id.split('-')[1],ch=document.getElementById('chev-'+i);ch.classList.toggle('open',b.classList.toggle('open'));}
-function setSort(k){sortKey=k;['spend','rev','cvr'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('on',x===k));renderTable();}
-function setPfSort(k){pfSortKey=k;['spend','rev','cvr'].forEach(x=>document.getElementById('ptab-'+x).classList.toggle('on',x===k));renderPortfolios();}
-function setView(v){
-  document.getElementById('view-campaign').classList.toggle('on',v==='campaign');
-  document.getElementById('view-portfolio').classList.toggle('on',v==='portfolio');
-  document.getElementById('campaign-view').style.display=v==='campaign'?'':'none';
-  document.getElementById('portfolio-view').style.display=v==='portfolio'?'':'none';
-}
-
-function load(week,file){
-  if(!file)return;
-  Papa.parse(file,{header:true,skipEmptyLines:true,
-    complete(res){
-      parsed[week]={...extract(res),filename:file.name};
-      document.getElementById('lbl-'+week).textContent=file.name;
-      document.getElementById('dz-'+week).classList.add('ok');
-      if(parsed.cur&&parsed.prior)renderResults();
-    },error(){alert('Could not parse file.');}
+function switchSection(s){
+  ['campaigns','asins'].forEach(x=>{
+    document.getElementById('tnav-'+x).classList.toggle('on',x===s);
+    document.getElementById('section-'+x).style.display=x===s?'':'none';
   });
 }
 
-function renderResults(){
-  const{cur,prior}=parsed;
-  allCampaigns=joinC(cur,prior);
-  portfoliosNB=buildNB(allCampaigns.filter(c=>c.seg==='nb'));
-  brandedPortfolio=buildB(allCampaigns.filter(c=>c.seg==='b'));
-  portfoliosOther=buildNB(allCampaigns.filter(c=>c.seg===null));
-  document.getElementById('results-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${allCampaigns.length} active campaigns`;
-  rChange('rev-pct','rev-abs',cur.rv,prior.rv,f$,1);
-  rChange('spend-pct','spend-abs',cur.sp,prior.sp,f$,0);
-  rCard('all-cvr-cur','all-cvr-prior',cur.all.cvr,prior.all.cvr,fP,1);
-  rCard('b-cvr-cur','b-cvr-prior',cur.b.cvr,prior.b.cvr,fP,1);
-  rCard('nb-cvr-cur','nb-cvr-prior',cur.nb.cvr,prior.nb.cvr,fP,1);
+/* ─── Campaign section ─────────────────────────────────────── */
+const cP={cur:null,prior:null};
+let cCamps=[],cPfsNB=[],cPfB=null,cPfsOther=[];
+let cSort='spend',cSeg='all',cPfSort='spend',cPfIdx=0;
+const SEG_CYCLE=['all','b','nb'],SEG_LBL={all:'Seg',b:'B',nb:'NB'},SEG_CLS={all:'st-all',b:'st-b',nb:'st-nb'};
+function cCycleSeg(){cSeg=SEG_CYCLE[(SEG_CYCLE.indexOf(cSeg)+1)%3];const t=document.getElementById('c-seg-toggle');t.className='seg-toggle '+SEG_CLS[cSeg];document.getElementById('c-seg-label').textContent=SEG_LBL[cSeg];cRenderTable();}
+const isB=n=>(n||'').toLowerCase().includes('| b |');
+const isNB=n=>(n||'').toLowerCase().includes('| nb |');
+const segLbl=n=>isB(n)?'b':isNB(n)?'nb':null;
+function getPf(name){const p=(name||'').split('|');return p.length>=2?p[1].trim():'Other';}
+function detectBrand(rows,nc){if(!nc)return'';const cnt={};for(const r of rows){const p=(r[nc]||'').trim().split('|');if(p.length)cnt[p[0].trim()]=(cnt[p[0].trim()]||0)+1;}return Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'';}
+
+function cExtract(res){
+  const h=res.meta.fields||[],rows=res.data;
+  const nc=findCol(h,['campaign name'],[]);
+  const sc=findCol(h,['total cost (converted)','total cost','spend','cost'],['per click','cpc','acos','of sale']);
+  const rc=findCol(h,['sales (converted)','7 day total sales','14 day total sales','total sales','attributed sales','revenue','sales'],['(#)','unit','units','new-to-brand','percentage','acos']);
+  const cc=findCol(h,['clicks'],[]);
+  const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
+  const ic=findCol(h,['impressions'],[]);
+  const brand=detectBrand(rows,nc);
+  const seg={all:{cl:0,or:0,sp:0,rv:0},b:{cl:0,or:0,sp:0,rv:0},nb:{cl:0,or:0,sp:0,rv:0}};
+  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0;const by={};
+  for(const row of rows){
+    const name=nc?(row[nc]||'').trim():'';if(!name)continue;
+    const cl=pn(row[cc]),or=pn(row[oc]),sp=pn(row[sc]),rv=pn(row[rc]),im=pn(row[ic]);
+    tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;tIm+=im;
+    seg.all.cl+=cl;seg.all.or+=or;seg.all.sp+=sp;seg.all.rv+=rv;
+    if(isB(name)){seg.b.cl+=cl;seg.b.or+=or;seg.b.sp+=sp;seg.b.rv+=rv;}
+    if(isNB(name)){seg.nb.cl+=cl;seg.nb.or+=or;seg.nb.sp+=sp;seg.nb.rv+=rv;}
+    if(!by[name])by[name]={name,cl:0,or:0,sp:0,rv:0};
+    by[name].cl+=cl;by[name].or+=or;by[name].sp+=sp;by[name].rv+=rv;
+  }
+  for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.roas=c.sp>0?c.rv/c.sp:null;c.pf=getPf(c.name);}
+  const roas=s=>s.sp>0?s.rv/s.sp:null,cvr=s=>s.cl>0?(s.or/s.cl)*100:null,cpc=s=>s.cl>0?s.sp/s.cl:null;
+  const ns=rows.map(r=>nc?(r[nc]||''):'');
+  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,sc,rc,cc,oc,ic,brand,
+    all:{...seg.all,roas:roas(seg.all),cvr:cvr(seg.all)},
+    b:{...seg.b,roas:roas(seg.b),cvr:cvr(seg.b),cpc:cpc(seg.b),cnt:ns.filter(isB).length},
+    nb:{...seg.nb,roas:roas(seg.nb),cvr:cvr(seg.nb),cpc:cpc(seg.nb),cnt:ns.filter(isNB).length},by};
+}
+function cJoin(cur,pr){
+  return Array.from(new Set([...Object.keys(cur.by),...Object.keys(pr.by)]))
+    .map(n=>({name:n,seg:segLbl(n),pf:getPf(n),cur:cur.by[n]||null,prior:pr.by[n]||null}))
+    .filter(c=>c.cur&&(c.cur.sp>0||c.cur.cl>0));
+}
+function buildNBPfs(camps){
+  const m={};
+  for(const c of camps){const k=c.pf||'Other';if(!m[k])m[k]={name:k,cur:{cl:0,or:0,sp:0,rv:0},prior:{cl:0,or:0,sp:0,rv:0},campaigns:[]};m[k].campaigns.push(c);if(c.cur){m[k].cur.cl+=c.cur.cl;m[k].cur.or+=c.cur.or;m[k].cur.sp+=c.cur.sp;m[k].cur.rv+=c.cur.rv;}if(c.prior){m[k].prior.cl+=c.prior.cl;m[k].prior.or+=c.prior.or;m[k].prior.sp+=c.prior.sp;m[k].prior.rv+=c.prior.rv;}}
+  for(const p of Object.values(m)){p.cur.roas=p.cur.sp>0?p.cur.rv/p.cur.sp:null;p.cur.cvr=p.cur.cl>0?(p.cur.or/p.cur.cl)*100:null;p.prior.roas=p.prior.sp>0?p.prior.rv/p.prior.sp:null;p.prior.cvr=p.prior.cl>0?(p.prior.or/p.prior.cl)*100:null;}
+  return Object.values(m);
+}
+function buildBPf(camps){
+  const p={name:'Branded',cur:{cl:0,or:0,sp:0,rv:0},prior:{cl:0,or:0,sp:0,rv:0},campaigns:camps};
+  for(const c of camps){if(c.cur){p.cur.cl+=c.cur.cl;p.cur.or+=c.cur.or;p.cur.sp+=c.cur.sp;p.cur.rv+=c.cur.rv;}if(c.prior){p.prior.cl+=c.prior.cl;p.prior.or+=c.prior.or;p.prior.sp+=c.prior.sp;p.prior.rv+=c.prior.rv;}}
+  p.cur.roas=p.cur.sp>0?p.cur.rv/p.cur.sp:null;p.cur.cvr=p.cur.cl>0?(p.cur.or/p.cur.cl)*100:null;p.prior.roas=p.prior.sp>0?p.prior.rv/p.prior.sp:null;p.prior.cvr=p.prior.cl>0?(p.prior.or/p.prior.cl)*100:null;
+  return p;
+}
+function cRenderTable(){
+  let camps=[...cCamps];
+  if(cSeg==='b')camps=camps.filter(c=>c.seg==='b');if(cSeg==='nb')camps=camps.filter(c=>c.seg==='nb');
+  camps.sort((a,b)=>cSort==='rev'?(b.cur?.rv||0)-(a.cur?.rv||0):cSort==='spend'?(b.cur?.sp||0)-(a.cur?.sp||0):cSort==='roas'?(b.cur?.roas||0)-(a.cur?.roas||0):(b.cur?.cvr||0)-(a.cur?.cvr||0));
+  document.getElementById('c-camp-body').innerHTML=camps.map(c=>{
+    const cur=c.cur,pr=c.prior,rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp),roD=roasD(cur,pr),cvD=cvrD(cur,pr);
+    const sb=c.seg?`<span class="seg-badge badge-${c.seg}">${c.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
+    return`<tr><td><div class="cname" title="${c.name}">${c.name}</div></td><td>${sb}</td><td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td><td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td><td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td><td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td></tr>`;
+  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--t2)">No campaigns match this filter.</td></tr>';
+  const lbl=cSort==='rev'?'revenue':cSort==='spend'?'spend':cSort==='roas'?'ROAS':'CVR';
+  document.getElementById('c-tbl-note').textContent=`${camps.length} active campaigns · ${cSeg==='b'?'branded only':cSeg==='nb'?'non-branded only':'all'} · sorted by ${lbl}`;
+}
+function cPfBlock(pf,isBG){
+  const i=cPfIdx++,c=pf.cur,p=pf.prior;
+  const rD=pd(c.rv,p.rv),sD=pd(c.sp,p.sp),roD2=roasD(c,p),cD2=ad(c.cvr,p.cvr);
+  const pl=(cv,pv,fn,dir)=>{if(cv===null||pv===null)return'';const d=cv-pv,a=d>0?'↑':d<0?'↓':'→',cl=dir===1?(d>0?'pos':'neg'):(d<0?'pos':'neg');return`<div class="pf-stat-prior ${cl}">${a} ${fn(pv)} prior</div>`;};
+  const cr=pf.campaigns.sort((a,b)=>(b.cur?.sp||0)-(a.cur?.sp||0)).map(c2=>{
+    const r2=pd(c2.cur?.rv,c2.prior?.rv),s2=pd(c2.cur?.sp,c2.prior?.sp),ro2=roasD(c2.cur,c2.prior),cv2=cvrD(c2.cur,c2.prior);
+    const sb=c2.seg?`<span class="seg-badge badge-${c2.seg}">${c2.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
+    return`<tr><td><div class="cname" title="${c2.name}">${c2.name}</div></td><td>${sb}</td><td class="num">${c2.cur?f$(c2.cur.rv):'—'}</td><td class="num">${pill(r2,fPct,1)}</td><td class="num">${c2.cur?f$(c2.cur.sp):'—'}</td><td class="num">${pill(s2,fPct,0)}</td><td class="num">${c2.cur?.roas!=null?fR(c2.cur.roas):'—'}</td><td class="num">${ro2!==null?pill(ro2,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td><td class="num">${c2.cur?.cvr!=null?fP(c2.cur.cvr):'—'}</td><td class="num">${cv2!==null?pill(cv2,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td></tr>`;
+  }).join('');
+  return`<div class="pf-block${isBG?' is-b':''}"><div class="pf-header" onclick="cTogglePf('cpf-${i}')"><div class="pf-name-row"><span class="pf-name">${pf.name}</span><span style="font-size:10px;color:var(--t2)">${pf.campaigns.length} campaign${pf.campaigns.length!==1?'s':''}</span></div><div style="display:flex;align-items:center;gap:8px"><div class="pf-summary"><span>${f$(c.rv)} rev ${pill(rD,fPct,1)}</span><span>${f$(c.sp)} spend ${pill(sD,fPct,0)}</span><span>${c.roas!=null?fR(c.roas):'-'} ROAS ${roD2!==null?pill(roD2,fRd,1):'—'}</span><span>${c.cvr!=null?fP(c.cvr):'-'} CVR</span></div><span class="pf-chevron" id="cchev-${i}">▼</span></div></div><div class="pf-body" id="cpf-${i}"><div class="pf-stats"><div class="pf-stat"><div class="pf-stat-lbl">Revenue</div><div class="pf-stat-val">${f$(c.rv)}</div>${pl(c.rv,p.rv,f$,1)}</div><div class="pf-stat"><div class="pf-stat-lbl">Spend</div><div class="pf-stat-val">${f$(c.sp)}</div>${pl(c.sp,p.sp,f$,-1)}</div><div class="pf-stat"><div class="pf-stat-lbl">ROAS</div><div class="pf-stat-val">${c.roas!=null?fR(c.roas):'—'}</div>${pl(c.roas,p.roas,fR,1)}</div><div class="pf-stat"><div class="pf-stat-lbl">CVR</div><div class="pf-stat-val">${c.cvr!=null?fP(c.cvr):'—'}</div>${pl(c.cvr,p.cvr,fP,1)}</div><div class="pf-stat"><div class="pf-stat-lbl">Orders</div><div class="pf-stat-val">${fI(c.or)}</div>${pl(c.or,p.or,fI,1)}</div></div><div class="tbl-wrap" style="margin-top:4px"><table class="camp-tbl"><thead><tr><th>Campaign</th><th>Seg</th><th class="num">Revenue</th><th class="num">Rev Δ</th><th class="num">Spend</th><th class="num">Spend Δ</th><th class="num">ROAS</th><th class="num">ROAS Δ</th><th class="num">CVR</th><th class="num">CVR Δ</th></tr></thead><tbody>${cr}</tbody></table></div></div></div>`;
+}
+function cRenderPfs(){
+  cPfIdx=0;
+  const sf=(a,b)=>cPfSort==='rev'?(b.cur.rv||0)-(a.cur.rv||0):cPfSort==='spend'?(b.cur.sp||0)-(a.cur.sp||0):cPfSort==='roas'?(b.cur.roas||0)-(a.cur.roas||0):(b.cur.cvr||0)-(a.cur.cvr||0);
+  document.getElementById('c-pf-list-nb').innerHTML=[...cPfsNB].sort(sf).map(p=>cPfBlock(p,false)).join('');
+  document.getElementById('c-pf-list-b').innerHTML=cPfB&&cPfB.campaigns.length?cPfBlock(cPfB,true):'<p style="font-size:12px;color:var(--t2);padding:8px 0">No branded campaigns found.</p>';
+  const og=document.getElementById('c-pf-group-other');if(cPfsOther.length){og.style.display='';document.getElementById('c-pf-list-other').innerHTML=[...cPfsOther].sort(sf).map(p=>cPfBlock(p,false)).join('');}else og.style.display='none';
+}
+function cTogglePf(id){const b=document.getElementById(id),i=id.replace('cpf-',''),ch=document.getElementById('cchev-'+i);ch.classList.toggle('open',b.classList.toggle('open'));}
+function cSetSort(k){cSort=k;['spend','rev','roas','cvr'].forEach(x=>document.getElementById('c-tab-'+x).classList.toggle('on',x===k));cRenderTable();}
+function cSetPfSort(k){cPfSort=k;['spend','rev','roas','cvr'].forEach(x=>document.getElementById('c-ptab-'+x).classList.toggle('on',x===k));cRenderPfs();}
+function cSetView(v){['metrics','campaign','portfolio'].forEach(x=>{document.getElementById('c-view-'+x).classList.toggle('on',x===v);document.getElementById('c-'+x+'-view').style.display=x===v?'':'none';});}
+function cLoad(week,file){
+  if(!file)return;
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete(res){cP[week]={...cExtract(res),filename:file.name};document.getElementById('c-lbl-'+week).textContent=file.name;document.getElementById('c-dz-'+week).classList.add('ok');if(cP.cur&&cP.prior)cRenderResults();},error(){alert('Could not parse file.');}});
+}
+function cRenderResults(){
+  const{cur,prior}=cP;
+  cCamps=cJoin(cur,prior);cPfsNB=buildNBPfs(cCamps.filter(c=>c.seg==='nb'));cPfB=buildBPf(cCamps.filter(c=>c.seg==='b'));cPfsOther=buildNBPfs(cCamps.filter(c=>c.seg===null));
+  const brand=cur.brand||prior.brand||'';
+  document.getElementById('c-brand-display').textContent=brand||'Campaign performance';
+  document.getElementById('app-title').textContent=brand||'WoW Comparator';
+  document.getElementById('c-results-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${cCamps.length} active campaigns`;
+  rChange('c-rev-pct','c-rev-abs',cur.rv,prior.rv,f$,1);rChange('c-spend-pct','c-spend-abs',cur.sp,prior.sp,f$,0);
+  rCard('c-all-roas-cur','c-all-roas-prior',cur.all.roas,prior.all.roas,fR,1);rCard('c-b-roas-cur','c-b-roas-prior',cur.b.roas,prior.b.roas,fR,1);rCard('c-nb-roas-cur','c-nb-roas-prior',cur.nb.roas,prior.nb.roas,fR,1);
+  rCard('c-all-cvr-cur','c-all-cvr-prior',cur.all.cvr,prior.all.cvr,fP,1);rCard('c-b-cvr-cur','c-b-cvr-prior',cur.b.cvr,prior.b.cvr,fP,1);rCard('c-nb-cvr-cur','c-nb-cvr-prior',cur.nb.cvr,prior.nb.cvr,fP,1);
   const ci=(!cur.ic||cur.im===0)?null:cur.im,pi=(!prior.ic||prior.im===0)?null:prior.im;
-  rCard('impr-cur','impr-prior',ci,pi,fI,1);
-  rCard('clicks-cur','clicks-prior',cur.cl,prior.cl,fI,1);
-  rCard('orders-cur','orders-prior',cur.or,prior.or,fI,1);
-  rCard('b-cpc-cur','b-cpc-prior',cur.b.cpc,prior.b.cpc,f$,-1);
-  rCard('nb-cpc-cur','nb-cpc-prior',cur.nb.cpc,prior.nb.cpc,f$,-1);
-  renderTable();renderPortfolios();
-  const w=[];
-  if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected in "${cur.filename}".`});
-  if(!prior.rc)w.push({t:'warn',m:`Revenue column not detected in "${prior.filename}".`});
-  if(!cur.oc)w.push({t:'err',m:`Orders column not detected in "${cur.filename}".`});
-  if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 in "${cur.filename}" despite column "${cur.oc}" being detected.`});
-  if(cur.b.cnt===0)w.push({t:'warn',m:`No "| b |" campaigns found — branded metrics unavailable.`});
-  if(cur.nb.cnt===0)w.push({t:'warn',m:`No "| nb |" campaigns found — non-branded metrics unavailable.`});
-  document.getElementById('warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
-  document.getElementById('upload-view').style.display='none';
-  document.getElementById('results-view').style.display='';
+  rCard('c-impr-cur','c-impr-prior',ci,pi,fI,1);rCard('c-clicks-cur','c-clicks-prior',cur.cl,prior.cl,fI,1);rCard('c-orders-cur','c-orders-prior',cur.or,prior.or,fI,1);
+  rCard('c-b-cpc-cur','c-b-cpc-prior',cur.b.cpc,prior.b.cpc,f$,-1);rCard('c-nb-cpc-cur','c-nb-cpc-prior',cur.nb.cpc,prior.nb.cpc,f$,-1);
+  cRenderTable();cRenderPfs();
+  const w=[];if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected in "${cur.filename}".`});if(!cur.oc)w.push({t:'err',m:`Orders column not detected in "${cur.filename}".`});if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 in "${cur.filename}".`});if(cur.b.cnt===0)w.push({t:'warn',m:`No "| b |" campaigns found.`});if(cur.nb.cnt===0)w.push({t:'warn',m:`No "| nb |" campaigns found.`});
+  document.getElementById('c-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
+  document.getElementById('c-upload-view').style.display='none';document.getElementById('c-results-view').style.display='';
+}
+function cReset(){
+  cP.cur=cP.prior=null;cCamps=[];cPfsNB=[];cPfB=null;cPfsOther=[];cSeg='all';cPfIdx=0;
+  const t=document.getElementById('c-seg-toggle');if(t){t.className='seg-toggle st-all';document.getElementById('c-seg-label').textContent='Seg';}
+  ['cur','prior'].forEach(w=>{document.getElementById('c-dz-'+w).classList.remove('ok');document.getElementById('c-lbl-'+w).textContent=w==='cur'?'Current week':'Prior week';document.getElementById('c-f-'+w).value='';});
+  document.getElementById('c-results-view').style.display='none';document.getElementById('c-upload-view').style.display='';cSetView('metrics');
 }
 
-function reset(){
-  parsed.cur=parsed.prior=null;allCampaigns=[];portfoliosNB=[];brandedPortfolio=null;portfoliosOther=[];segFilter='all';
-  const t=document.getElementById('seg-toggle');if(t){t.className='seg-toggle st-all';document.getElementById('seg-label').textContent='Seg';}
-  ['cur','prior'].forEach(w=>{document.getElementById('dz-'+w).classList.remove('ok');document.getElementById('lbl-'+w).textContent=w==='cur'?'Current week':'Prior week';document.getElementById('f-'+w).value='';});
-  document.getElementById('results-view').style.display='none';document.getElementById('upload-view').style.display='';
+/* ─── ASIN section ─────────────────────────────────────────── */
+const aP={cur:null,prior:null};
+let aAsins=[];
+let aSort='rev';
+
+function aExtract(res){
+  const h=res.meta.fields||[],rows=res.data;
+  // Amazon product report column variants
+  const asinCol=findCol(h,['advertised asin','asin'],['search term','keyword','query','campaign name']);
+  const skuCol =findCol(h,['advertised sku','sku'],['search term','keyword','campaign name']);
+  const sc=findCol(h,['spend','total cost (converted)','total cost','cost'],['per click','cpc','acos','of sale']);
+  // Prefer "advertised sku sales" over "total sales" for product-level reports
+  const rc=findCol(h,['7 day advertised sku sales','advertised sku sales ($)','7 day total sales','14 day total sales','sales (converted)','total sales','attributed sales','revenue','sales'],['(#)','unit','units','new-to-brand','percentage','acos','other sku']);
+  const cc=findCol(h,['clicks'],[]);
+  const oc=findCol(h,['7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','purchases','total orders (#)','total orders','orders (#)','orders'],['new-to-brand','new to brand','unit']);
+  const by={};let tSp=0,tRv=0,tCl=0,tOr=0;
+  for(const row of rows){
+    const asin=asinCol?(row[asinCol]||'').trim():'';if(!asin||asin.toLowerCase()==='total'||asin.length<1)continue;
+    const sku=skuCol?(row[skuCol]||'').trim():'';
+    const cl=pn(row[cc]),or=pn(row[oc]),sp=pn(row[sc]),rv=pn(row[rc]);
+    tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;
+    if(!by[asin])by[asin]={asin,sku,cl:0,or:0,sp:0,rv:0};
+    by[asin].cl+=cl;by[asin].or+=or;by[asin].sp+=sp;by[asin].rv+=rv;
+    if(sku)by[asin].sku=sku;
+  }
+  for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.roas=c.sp>0?c.rv/c.sp:null;}
+  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,cvr:tCl>0?(tOr/tCl)*100:null,roas:tSp>0?tRv/tSp:null,asinCol,skuCol,sc:sc,rc:rc,cc:cc,oc:oc,by};
+}
+function aJoin(cur,pr){
+  return Array.from(new Set([...Object.keys(cur.by),...Object.keys(pr.by)]))
+    .map(asin=>({asin,sku:cur.by[asin]?.sku||pr.by[asin]?.sku||'',cur:cur.by[asin]||null,prior:pr.by[asin]||null}))
+    .filter(a=>a.cur&&(a.cur.sp>0||a.cur.cl>0));
+}
+function aRenderTable(){
+  const sorted=[...aAsins].sort((a,b)=>aSort==='rev'?(b.cur?.rv||0)-(a.cur?.rv||0):aSort==='spend'?(b.cur?.sp||0)-(a.cur?.sp||0):aSort==='roas'?(b.cur?.roas||0)-(a.cur?.roas||0):aSort==='orders'?(b.cur?.or||0)-(a.cur?.or||0):(b.cur?.cvr||0)-(a.cur?.cvr||0));
+  document.getElementById('a-body').innerHTML=sorted.map(a=>{
+    const cur=a.cur,pr=a.prior;
+    const rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp);
+    const roD=cur?.roas!=null&&pr?.roas!=null?cur.roas-pr.roas:null;
+    const orD=pd(cur?.or,pr?.or);
+    const cvD=cur?.cvr!=null&&pr?.cvr!=null?cur.cvr-pr.cvr:null;
+    return`<tr>
+      <td><span style="font-family:var(--m);font-size:11px;font-weight:500">${a.asin}</span></td>
+      <td style="font-size:10px;color:var(--t2);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.sku}">${a.sku||'—'}</td>
+      <td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td>
+      <td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td>
+      <td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${cur?fI(cur.or):'—'}</td><td class="num">${pill(orD,fPct,1)}</td>
+      <td class="num">${cur?fI(cur.cl):'—'}</td>
+      <td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="13" style="text-align:center;padding:1.5rem;color:var(--t2)">No active ASINs found.</td></tr>';
+  const lbl=aSort==='rev'?'revenue':aSort==='spend'?'spend':aSort==='roas'?'ROAS':aSort==='orders'?'orders':'CVR';
+  document.getElementById('a-tbl-note').textContent=`${sorted.length} active ASINs · sorted by ${lbl}`;
+}
+function aSetSort(k){aSort=k;['rev','spend','roas','orders','cvr'].forEach(x=>document.getElementById('a-tab-'+x).classList.toggle('on',x===k));aRenderTable();}
+function aLoad(week,file){
+  if(!file)return;
+  Papa.parse(file,{header:true,skipEmptyLines:true,
+    complete(res){aP[week]={...aExtract(res),filename:file.name};document.getElementById('a-lbl-'+week).textContent=file.name;document.getElementById('a-dz-'+week).classList.add('ok');if(aP.cur&&aP.prior)aRenderResults();},
+    error(){alert('Could not parse file.');}
+  });
+}
+function aRenderResults(){
+  const{cur,prior}=aP;
+  aAsins=aJoin(cur,prior);
+  document.getElementById('a-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${aAsins.length} active ASINs`;
+  rCard('a-rev-cur',   'a-rev-prior',   cur.rv,   prior.rv,   f$,1);
+  rCard('a-spend-cur', 'a-spend-prior', cur.sp,   prior.sp,   f$,0);
+  rCard('a-roas-cur',  'a-roas-prior',  cur.roas, prior.roas, fR,1);
+  rCard('a-orders-cur','a-orders-prior',cur.or,   prior.or,   fI,1);
+  rCard('a-clicks-cur','a-clicks-prior',cur.cl,   prior.cl,   fI,1);
+  rCard('a-cvr-cur',   'a-cvr-prior',   cur.cvr,  prior.cvr,  fP,1);
+  aRenderTable();
+  // Show column hint
+  const hint=document.getElementById('a-hint');hint.style.display='';
+  hint.innerHTML=`Detected — ASIN: <b>${cur.asinCol||'NOT FOUND'}</b> · Revenue: <b>${cur.rc||'NOT FOUND'}</b> · Spend: <b>${cur.sc||'NOT FOUND'}</b> · Orders: <b>${cur.oc||'NOT FOUND'}</b>`;
+  const w=[];
+  if(!cur.asinCol)w.push({t:'err',m:`ASIN column not found in "${cur.filename}". Expected "Advertised ASIN" — make sure you're uploading a Sponsored Products advertised product report, not a campaign or keyword report.`});
+  if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected in "${cur.filename}".`});
+  if(!cur.oc)w.push({t:'err',m:`Orders column not detected in "${cur.filename}".`});
+  if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 in "${cur.filename}" despite detecting "${cur.oc}".`});
+  document.getElementById('a-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
+  document.getElementById('a-upload-view').style.display='none';document.getElementById('a-results-view').style.display='';
+}
+function aReset(){
+  aP.cur=aP.prior=null;aAsins=[];
+  ['cur','prior'].forEach(w=>{document.getElementById('a-dz-'+w).classList.remove('ok');document.getElementById('a-lbl-'+w).textContent=w==='cur'?'Current week':'Prior week';document.getElementById('a-f-'+w).value='';});
+  document.getElementById('a-hint').style.display='none';document.getElementById('a-results-view').style.display='none';document.getElementById('a-upload-view').style.display='';
 }
 </script>
 </body>
