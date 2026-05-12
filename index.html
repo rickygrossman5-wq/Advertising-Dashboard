@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WoW Campaign Comparator</title>
+  <title>PLTFRM WoW Comparator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,31 +39,59 @@
     .mc-prior { font-size: 12px; font-family: var(--m); margin-top: 6px; }
     .seg-badge { display: inline-block; font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 10px; }
     .badge-b { background: #e0e7ff; color: #3730a3; } .badge-nb { background: #fce7f3; color: #9d174d; } .badge-all { background: rgba(0,0,0,.06); color: #6b7280; }
-    .tab-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-    .stab { font-size: 11px; padding: 4px 12px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
-    .stab:hover { color: var(--t1); } .stab.on { background: var(--t1); color: var(--bg1); border-color: transparent; }
     .top-nav { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; border-bottom: 0.5px solid var(--br); padding-bottom: 12px; }
     .tnav { font-size: 13px; font-weight: 500; padding: 6px 18px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
     .tnav:hover { color: var(--t1); } .tnav.on { background: var(--t1); color: var(--bg1); border-color: transparent; }
     .view-toggle { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
     .vtab { font-size: 12px; font-weight: 500; padding: 6px 16px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
     .vtab.on { background: var(--t1); color: var(--bg1); border-color: transparent; }
-    .camp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .camp-tbl th { padding: 7px 10px; border-bottom: 1px solid var(--br); color: var(--t2); font-weight: 500; font-size: 9px; text-transform: uppercase; letter-spacing: .04em; text-align: left; white-space: nowrap; }
+
+    /* ── Tables ── */
+    .camp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+    .camp-tbl th {
+      padding: 7px 10px; border-bottom: 1px solid var(--br); color: var(--t2);
+      font-weight: 500; font-size: 9px; text-transform: uppercase; letter-spacing: .04em;
+      text-align: left; white-space: nowrap; position: relative; user-select: none;
+    }
+    .camp-tbl th.sortable { cursor: pointer; }
+    .camp-tbl th.sortable:hover { color: var(--t1); }
     .camp-tbl th.num { text-align: right; }
-    .camp-tbl td { padding: 7px 10px; border-bottom: 0.5px solid var(--br); vertical-align: middle; color: var(--t1); }
+    .camp-tbl td { padding: 7px 10px; border-bottom: 0.5px solid var(--br); vertical-align: middle; color: var(--t1); overflow: hidden; }
     .camp-tbl td.num { text-align: right; font-family: var(--m); font-size: 11px; }
     .camp-tbl tr:last-child td { border-bottom: none; }
     .camp-tbl tr:hover td { background: var(--bg2); }
-    .cname { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+
+    /* Sort indicator in th */
+    .sort-icon { font-size: 9px; margin-left: 3px; opacity: .4; }
+    .sort-icon.active { opacity: 1; color: var(--t1); }
+
+    /* Campaign name cell — resizable via JS */
+    .th-campaign { width: var(--cname-w, 220px); min-width: 120px; }
+    .td-campaign { width: var(--cname-w, 220px); vertical-align: middle; }
+    .cname { font-size: 11px; color: var(--t1); white-space: normal; word-break: break-word; display: block; }
+
+    /* Resize handle */
+    .resize-handle {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 8px;
+      cursor: col-resize; z-index: 2;
+    }
+    .resize-handle::after {
+      content: ''; position: absolute; right: 2px; top: 20%; bottom: 20%;
+      width: 2px; border-radius: 2px; background: var(--br);
+      transition: background .1s;
+    }
+    .resize-handle:hover::after { background: var(--t2); }
+
     .delta-pill { display: inline-block; font-size: 10px; font-family: var(--m); padding: 2px 6px; border-radius: 6px; }
     .pill-pos { background: #f0fdf4; color: var(--s); } .pill-neg { background: #fef2f2; color: var(--d); } .pill-neu { background: var(--bg2); color: var(--t2); }
     .tbl-wrap { overflow-x: auto; border-radius: var(--r-lg); border: 0.5px solid var(--br); }
     .tbl-note { font-size: 10px; color: var(--t2); margin-top: 6px; text-align: right; }
+
     .seg-toggle { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; padding: 2px 6px; border-radius: 8px; border: 0.5px solid var(--br); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; transition: all .1s; white-space: nowrap; }
     .seg-toggle.st-all { background: transparent; color: var(--t2); }
     .seg-toggle.st-b { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
     .seg-toggle.st-nb { background: #fce7f3; color: #9d174d; border-color: #fbcfe8; }
+
     .pf-group { margin-bottom: 20px; }
     .pf-group-lbl { font-size: 11px; font-weight: 500; color: var(--t1); margin-bottom: 8px; padding-bottom: 5px; border-bottom: 0.5px solid var(--br); }
     .pf-block { border: 0.5px solid var(--br); border-radius: var(--r-lg); margin-bottom: 8px; overflow: hidden; }
@@ -82,6 +110,7 @@
     .pf-stat-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: var(--t2); margin-bottom: 4px; }
     .pf-stat-val { font-size: 15px; font-weight: 500; font-family: var(--m); color: var(--t1); }
     .pf-stat-prior { font-size: 10px; font-family: var(--m); margin-top: 3px; }
+
     .warn { background: #fffbeb; border: 0.5px solid #fcd34d; border-radius: var(--r-md); padding: 10px 14px; font-size: 12px; color: #78350f; margin-top: 10px; }
     .err  { background: #fef2f2; border: 0.5px solid #fca5a5; border-radius: var(--r-md); padding: 10px 14px; font-size: 12px; color: #7f1d1d; margin-top: 10px; }
     .rst-btn { font-size: 11px; padding: 3px 10px; border: 0.5px solid var(--br); border-radius: 20px; background: transparent; cursor: pointer; color: var(--t2); }
@@ -93,11 +122,11 @@
 <div class="container">
 
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-    <p style="font-size:18px;font-weight:500" id="app-title">WoW Comparator</p>
+    <p style="font-size:18px;font-weight:500" id="app-title">PLTFRM</p>
   </div>
   <div class="top-nav">
     <button class="tnav on" id="tnav-campaigns" onclick="switchSection('campaigns')">Campaigns</button>
-    <button class="tnav"    id="tnav-asins"     onclick="switchSection('asins')">ASINs</button>
+    <button class="tnav"    id="tnav-asins"     onclick="switchSection('asins')">Products</button>
   </div>
 
   <!-- ═══ CAMPAIGNS ═══ -->
@@ -134,6 +163,7 @@
         <button class="vtab"    id="c-view-portfolio" onclick="cSetView('portfolio')">Portfolios</button>
       </div>
 
+      <!-- METRICS -->
       <div id="c-metrics-view">
         <div class="chg-card" style="margin-bottom:12px">
           <div class="chg-lbl">Revenue & spend — prior → current</div>
@@ -165,22 +195,26 @@
         </div>
       </div>
 
+      <!-- CAMPAIGNS TABLE -->
       <div id="c-campaign-view" style="display:none">
-        <div class="tab-row">
-          <button class="stab on" id="c-tab-spend" onclick="cSetSort('spend')">By spend</button>
-          <button class="stab" id="c-tab-rev"  onclick="cSetSort('rev')">By revenue</button>
-          <button class="stab" id="c-tab-roas" onclick="cSetSort('roas')">By ROAS</button>
-          <button class="stab" id="c-tab-cvr"  onclick="cSetSort('cvr')">By CVR</button>
-        </div>
         <div class="tbl-wrap">
-          <table class="camp-tbl">
+          <table class="camp-tbl" id="c-camp-tbl">
             <thead><tr>
-              <th>Campaign</th>
-              <th><span class="seg-toggle st-all" id="c-seg-toggle" onclick="cCycleSeg()"><span id="c-seg-label">Seg</span> <span style="opacity:.5">⇅</span></span></th>
-              <th class="num">Revenue</th><th class="num">Rev Δ</th>
-              <th class="num">Spend</th><th class="num">Spend Δ</th>
-              <th class="num">ROAS</th><th class="num">ROAS Δ</th>
-              <th class="num">CVR</th><th class="num">CVR Δ</th>
+              <th class="th-campaign" id="c-th-name">
+                Campaign
+                <div class="resize-handle" id="c-resize-handle"></div>
+              </th>
+              <th style="width:44px">
+                <span class="seg-toggle st-all" id="c-seg-toggle" onclick="cCycleSeg()"><span id="c-seg-label">Seg</span> <span style="opacity:.5">⇅</span></span>
+              </th>
+              <th class="num sortable" onclick="cSetSort('rev')">Revenue <span class="sort-icon" id="c-si-rev">↕</span></th>
+              <th class="num" style="width:52px">Rev Δ</th>
+              <th class="num sortable" onclick="cSetSort('spend')">Spend <span class="sort-icon" id="c-si-spend">↕</span></th>
+              <th class="num" style="width:52px">Spend Δ</th>
+              <th class="num sortable" onclick="cSetSort('roas')">ROAS <span class="sort-icon" id="c-si-roas">↕</span></th>
+              <th class="num" style="width:52px">ROAS Δ</th>
+              <th class="num sortable" onclick="cSetSort('cvr')">CVR <span class="sort-icon" id="c-si-cvr">↕</span></th>
+              <th class="num" style="width:52px">CVR Δ</th>
             </tr></thead>
             <tbody id="c-camp-body"></tbody>
           </table>
@@ -188,12 +222,13 @@
         <div class="tbl-note" id="c-tbl-note"></div>
       </div>
 
+      <!-- PORTFOLIO VIEW -->
       <div id="c-portfolio-view" style="display:none">
-        <div class="tab-row">
-          <button class="stab on" id="c-ptab-spend" onclick="cSetPfSort('spend')">By spend</button>
-          <button class="stab" id="c-ptab-rev"  onclick="cSetPfSort('rev')">By revenue</button>
-          <button class="stab" id="c-ptab-roas" onclick="cSetPfSort('roas')">By ROAS</button>
-          <button class="stab" id="c-ptab-cvr"  onclick="cSetPfSort('cvr')">By CVR</button>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <button class="vtab on" id="c-ptab-spend" onclick="cSetPfSort('spend')" style="font-size:11px;padding:4px 12px">By spend</button>
+          <button class="vtab"    id="c-ptab-rev"   onclick="cSetPfSort('rev')"   style="font-size:11px;padding:4px 12px">By revenue</button>
+          <button class="vtab"    id="c-ptab-roas"  onclick="cSetPfSort('roas')"  style="font-size:11px;padding:4px 12px">By ROAS</button>
+          <button class="vtab"    id="c-ptab-cvr"   onclick="cSetPfSort('cvr')"   style="font-size:11px;padding:4px 12px">By CVR</button>
         </div>
         <div class="pf-group">
           <div class="pf-group-lbl">Non-branded <span class="seg-badge badge-nb" style="vertical-align:middle">| nb |</span></div>
@@ -212,11 +247,11 @@
     </div>
   </div>
 
-  <!-- ═══ ASINS ═══ -->
+  <!-- ═══ PRODUCTS ═══ -->
   <div id="section-asins" style="display:none">
     <div id="a-upload-view">
-      <p style="font-size:13px;color:var(--t2);margin-bottom:4px">Upload Sponsored Products advertised product reports.</p>
-      <p style="font-size:11px;color:var(--t2);margin-bottom:1rem">Prior week first, then current week. Metrics aggregated per ASIN across all campaigns.</p>
+      <p style="font-size:13px;color:var(--t2);margin-bottom:4px">Upload your product performance reports.</p>
+      <p style="font-size:11px;color:var(--t2);margin-bottom:1rem">Prior week first, then current week.</p>
       <div class="g2">
         <div class="dz" id="a-dz-prior" onclick="document.getElementById('a-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="a-f-prior" accept=".csv" style="display:none" onchange="aLoad('prior',this.files[0])">
@@ -236,12 +271,11 @@
     <div id="a-results-view" style="display:none;padding-bottom:2rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div>
-          <p style="font-size:16px;font-weight:500">ASIN performance</p>
+          <p style="font-size:16px;font-weight:500">Product performance</p>
           <p style="font-size:11px;color:var(--t2);margin-top:2px" id="a-sub"></p>
         </div>
         <button class="rst-btn" onclick="aReset()">↺ Reset</button>
       </div>
-
       <div class="slbl">Portfolio totals</div>
       <div class="g3" style="margin-bottom:12px">
         <div class="metric-card"><div class="mc-lbl">Ad Revenue</div><div class="mc-val" id="a-rev-cur">—</div><div class="mc-prior" id="a-rev-prior"></div></div>
@@ -254,24 +288,23 @@
         <div class="metric-card"><div class="mc-lbl">CVR</div><div class="mc-val" id="a-cvr-cur">—</div><div class="mc-prior" id="a-cvr-prior"></div></div>
       </div>
 
-      <div class="tab-row">
-        <button class="stab on" id="a-tab-rev"    onclick="aSetSort('rev')">By revenue</button>
-        <button class="stab"    id="a-tab-spend"  onclick="aSetSort('spend')">By spend</button>
-        <button class="stab"    id="a-tab-roas"   onclick="aSetSort('roas')">By ROAS</button>
-        <button class="stab"    id="a-tab-orders" onclick="aSetSort('orders')">By orders</button>
-        <button class="stab"    id="a-tab-cvr"    onclick="aSetSort('cvr')">By CVR</button>
-      </div>
       <div class="tbl-wrap">
-        <table class="camp-tbl">
+        <table class="camp-tbl" id="a-camp-tbl">
           <thead><tr>
-            <th>ASIN</th>
-            <th>SKU</th>
-            <th class="num">Revenue</th><th class="num">Rev Δ</th>
-            <th class="num">Spend</th><th class="num">Spend Δ</th>
-            <th class="num">ROAS</th><th class="num">ROAS Δ</th>
-            <th class="num">Orders</th><th class="num">Orders Δ</th>
-            <th class="num">Clicks</th>
-            <th class="num">CVR</th><th class="num">CVR Δ</th>
+            <th class="th-campaign" id="a-th-name">
+              Product
+              <div class="resize-handle" id="a-resize-handle"></div>
+            </th>
+            <th class="num sortable" onclick="aSetSort('rev')">Revenue <span class="sort-icon" id="a-si-rev">↕</span></th>
+            <th class="num" style="width:52px">Rev Δ</th>
+            <th class="num sortable" onclick="aSetSort('spend')">Spend <span class="sort-icon" id="a-si-spend">↕</span></th>
+            <th class="num" style="width:52px">Spend Δ</th>
+            <th class="num sortable" onclick="aSetSort('roas')">ROAS <span class="sort-icon" id="a-si-roas">↕</span></th>
+            <th class="num" style="width:52px">ROAS Δ</th>
+            <th class="num sortable" onclick="aSetSort('orders')">Orders <span class="sort-icon" id="a-si-orders">↕</span></th>
+            <th class="num" style="width:52px">Orders Δ</th>
+            <th class="num sortable" onclick="aSetSort('cvr')">CVR <span class="sort-icon" id="a-si-cvr">↕</span></th>
+            <th class="num" style="width:52px">CVR Δ</th>
           </tr></thead>
           <tbody id="a-body"></tbody>
         </table>
@@ -282,20 +315,14 @@
     </div>
   </div>
 
-</div>
+</div><!-- /container -->
 <script>
-/* ─── Shared utils ─────────────────────────────────────────── */
-function findCol(h,kws,exc){
-  const hl=h.map(x=>(x||'').toLowerCase().trim());
-  const i=hl.findIndex(hh=>{if((exc||[]).some(e=>hh.includes(e)))return false;return kws.some(k=>hh.includes(k));});
-  return i>=0?h[i]:null;
-}
+/* ─── Shared utils ─────────────────────────────── */
+function findCol(h,kws,exc){const hl=h.map(x=>(x||'').toLowerCase().trim());const i=hl.findIndex(hh=>{if((exc||[]).some(e=>hh.includes(e)))return false;return kws.some(k=>hh.includes(k));});return i>=0?h[i]:null;}
 function pn(v){if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[$,%\s]/g,''));return isNaN(n)?0:n;}
 const f$=v=>'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fP=v=>v.toFixed(2)+'%',fR=v=>v.toFixed(2)+'x',fI=v=>Math.round(v).toLocaleString('en-US');
-const fPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%';
-const fPp=v=>(v>=0?'+':'')+v.toFixed(2)+' pp';
-const fRd=v=>(v>=0?'+':'')+v.toFixed(2)+'x';
+const fPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%',fPp=v=>(v>=0?'+':'')+v.toFixed(2)+' pp',fRd=v=>(v>=0?'+':'')+v.toFixed(2)+'x';
 function pd(c,p){if(c===null||p===null)return null;if(p===0)return c>0?Infinity:0;return(c-p)/Math.abs(p)*100;}
 function ad(c,p){if(c===null||p===null)return null;return c-p;}
 function roasD(c,p){if(!c||!p||c.roas===null||p.roas===null)return null;return c.roas-p.roas;}
@@ -327,10 +354,59 @@ function switchSection(s){
   });
 }
 
-/* ─── Campaign section ─────────────────────────────────────── */
+/* ─── Resize handle ────────────────────────────── */
+// Maps handle id → { thId, tblId, cssVar, width }
+const resizeState = {};
+function initResize(handleId, thId, tblId, cssVar, defaultW) {
+  resizeState[handleId] = { thId, tblId, cssVar, width: defaultW };
+  applyColWidth(handleId);
+  const handle = document.getElementById(handleId);
+  if (!handle) return;
+  let startX, startW;
+  handle.addEventListener('mousedown', e => {
+    startX = e.clientX;
+    startW = resizeState[handleId].width;
+    const onMove = e2 => {
+      const w = Math.max(120, Math.min(520, startW + e2.clientX - startX));
+      resizeState[handleId].width = w;
+      applyColWidth(handleId);
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault();
+    e.stopPropagation();
+  });
+}
+function applyColWidth(handleId) {
+  const s = resizeState[handleId];
+  const w = s.width + 'px';
+  const tbl = document.getElementById(s.tblId);
+  if (tbl) tbl.style.setProperty(s.cssVar, w);
+}
+
+/* ─── Sort indicator helper ────────────────────── */
+function updateSortIcons(prefix, sortKey, sortDir, keys) {
+  keys.forEach(k => {
+    const el = document.getElementById(prefix+k);
+    if (!el) return;
+    if (k === sortKey) {
+      el.textContent = sortDir === 'asc' ? '↑' : '↓';
+      el.classList.add('active');
+    } else {
+      el.textContent = '↕';
+      el.classList.remove('active');
+    }
+  });
+}
+
+/* ─── Campaign section ─────────────────────────── */
 const cP={cur:null,prior:null};
 let cCamps=[],cPfsNB=[],cPfB=null,cPfsOther=[];
-let cSort='spend',cSeg='all',cPfSort='spend',cPfIdx=0;
+let cSort='rev',cSortDir='desc',cSeg='all',cPfSort='spend',cPfIdx=0;
 const SEG_CYCLE=['all','b','nb'],SEG_LBL={all:'Seg',b:'B',nb:'NB'},SEG_CLS={all:'st-all',b:'st-b',nb:'st-nb'};
 function cCycleSeg(){cSeg=SEG_CYCLE[(SEG_CYCLE.indexOf(cSeg)+1)%3];const t=document.getElementById('c-seg-toggle');t.className='seg-toggle '+SEG_CLS[cSeg];document.getElementById('c-seg-label').textContent=SEG_LBL[cSeg];cRenderTable();}
 const isB=n=>(n||'').toLowerCase().includes('| b |');
@@ -338,7 +414,6 @@ const isNB=n=>(n||'').toLowerCase().includes('| nb |');
 const segLbl=n=>isB(n)?'b':isNB(n)?'nb':null;
 function getPf(name){const p=(name||'').split('|');return p.length>=2?p[1].trim():'Other';}
 function detectBrand(rows,nc){if(!nc)return'';const cnt={};for(const r of rows){const p=(r[nc]||'').trim().split('|');if(p.length)cnt[p[0].trim()]=(cnt[p[0].trim()]||0)+1;}return Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'';}
-
 function cExtract(res){
   const h=res.meta.fields||[],rows=res.data;
   const nc=findCol(h,['campaign name'],[]);
@@ -385,18 +460,32 @@ function buildBPf(camps){
   p.cur.roas=p.cur.sp>0?p.cur.rv/p.cur.sp:null;p.cur.cvr=p.cur.cl>0?(p.cur.or/p.cur.cl)*100:null;p.prior.roas=p.prior.sp>0?p.prior.rv/p.prior.sp:null;p.prior.cvr=p.prior.cl>0?(p.prior.or/p.prior.cl)*100:null;
   return p;
 }
+
 function cRenderTable(){
   let camps=[...cCamps];
-  if(cSeg==='b')camps=camps.filter(c=>c.seg==='b');if(cSeg==='nb')camps=camps.filter(c=>c.seg==='nb');
-  camps.sort((a,b)=>cSort==='rev'?(b.cur?.rv||0)-(a.cur?.rv||0):cSort==='spend'?(b.cur?.sp||0)-(a.cur?.sp||0):cSort==='roas'?(b.cur?.roas||0)-(a.cur?.roas||0):(b.cur?.cvr||0)-(a.cur?.cvr||0));
+  if(cSeg==='b')camps=camps.filter(c=>c.seg==='b');
+  if(cSeg==='nb')camps=camps.filter(c=>c.seg==='nb');
+  const dir=cSortDir==='asc'?1:-1;
+  const val=c=>cSort==='rev'?(c.cur?.rv||0):cSort==='spend'?(c.cur?.sp||0):cSort==='roas'?(c.cur?.roas||0):(c.cur?.cvr||0);
+  camps.sort((a,b)=>(val(a)-val(b))*dir*-1);
+  updateSortIcons('c-si-',cSort,cSortDir,['rev','spend','roas','cvr']);
   document.getElementById('c-camp-body').innerHTML=camps.map(c=>{
     const cur=c.cur,pr=c.prior,rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp),roD=roasD(cur,pr),cvD=cvrD(cur,pr);
     const sb=c.seg?`<span class="seg-badge badge-${c.seg}">${c.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
-    return`<tr><td><div class="cname" title="${c.name}">${c.name}</div></td><td>${sb}</td><td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td><td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td><td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td><td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td></tr>`;
-  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--t2)">No campaigns match this filter.</td></tr>';
+    return`<tr>
+      <td class="td-campaign"><span class="cname">${c.name}</span></td>
+      <td>${sb}</td>
+      <td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td>
+      <td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td>
+      <td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--t2)">No campaigns match.</td></tr>';
   const lbl=cSort==='rev'?'revenue':cSort==='spend'?'spend':cSort==='roas'?'ROAS':'CVR';
-  document.getElementById('c-tbl-note').textContent=`${camps.length} active campaigns · ${cSeg==='b'?'branded only':cSeg==='nb'?'non-branded only':'all'} · sorted by ${lbl}`;
+  document.getElementById('c-tbl-note').textContent=`${camps.length} active campaigns · ${cSeg==='b'?'branded':cSeg==='nb'?'non-branded':'all'} · sorted by ${lbl}`;
 }
+function cSetSort(k){if(cSort===k){cSortDir=cSortDir==='desc'?'asc':'desc';}else{cSort=k;cSortDir='desc';}cRenderTable();}
+
 function cPfBlock(pf,isBG){
   const i=cPfIdx++,c=pf.cur,p=pf.prior;
   const rD=pd(c.rv,p.rv),sD=pd(c.sp,p.sp),roD2=roasD(c,p),cD2=ad(c.cvr,p.cvr);
@@ -404,9 +493,34 @@ function cPfBlock(pf,isBG){
   const cr=pf.campaigns.sort((a,b)=>(b.cur?.sp||0)-(a.cur?.sp||0)).map(c2=>{
     const r2=pd(c2.cur?.rv,c2.prior?.rv),s2=pd(c2.cur?.sp,c2.prior?.sp),ro2=roasD(c2.cur,c2.prior),cv2=cvrD(c2.cur,c2.prior);
     const sb=c2.seg?`<span class="seg-badge badge-${c2.seg}">${c2.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
-    return`<tr><td><div class="cname" title="${c2.name}">${c2.name}</div></td><td>${sb}</td><td class="num">${c2.cur?f$(c2.cur.rv):'—'}</td><td class="num">${pill(r2,fPct,1)}</td><td class="num">${c2.cur?f$(c2.cur.sp):'—'}</td><td class="num">${pill(s2,fPct,0)}</td><td class="num">${c2.cur?.roas!=null?fR(c2.cur.roas):'—'}</td><td class="num">${ro2!==null?pill(ro2,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td><td class="num">${c2.cur?.cvr!=null?fP(c2.cur.cvr):'—'}</td><td class="num">${cv2!==null?pill(cv2,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td></tr>`;
+    return`<tr><td style="font-size:11px;word-break:break-word">${c2.name}</td><td>${sb}</td>
+      <td class="num">${c2.cur?f$(c2.cur.rv):'—'}</td><td class="num">${pill(r2,fPct,1)}</td>
+      <td class="num">${c2.cur?f$(c2.cur.sp):'—'}</td><td class="num">${pill(s2,fPct,0)}</td>
+      <td class="num">${c2.cur?.roas!=null?fR(c2.cur.roas):'—'}</td><td class="num">${ro2!==null?pill(ro2,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${c2.cur?.cvr!=null?fP(c2.cur.cvr):'—'}</td><td class="num">${cv2!==null?pill(cv2,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+    </tr>`;
   }).join('');
-  return`<div class="pf-block${isBG?' is-b':''}"><div class="pf-header" onclick="cTogglePf('cpf-${i}')"><div class="pf-name-row"><span class="pf-name">${pf.name}</span><span style="font-size:10px;color:var(--t2)">${pf.campaigns.length} campaign${pf.campaigns.length!==1?'s':''}</span></div><div style="display:flex;align-items:center;gap:8px"><div class="pf-summary"><span>${f$(c.rv)} rev ${pill(rD,fPct,1)}</span><span>${f$(c.sp)} spend ${pill(sD,fPct,0)}</span><span>${c.roas!=null?fR(c.roas):'-'} ROAS ${roD2!==null?pill(roD2,fRd,1):'—'}</span><span>${c.cvr!=null?fP(c.cvr):'-'} CVR</span></div><span class="pf-chevron" id="cchev-${i}">▼</span></div></div><div class="pf-body" id="cpf-${i}"><div class="pf-stats"><div class="pf-stat"><div class="pf-stat-lbl">Revenue</div><div class="pf-stat-val">${f$(c.rv)}</div>${pl(c.rv,p.rv,f$,1)}</div><div class="pf-stat"><div class="pf-stat-lbl">Spend</div><div class="pf-stat-val">${f$(c.sp)}</div>${pl(c.sp,p.sp,f$,-1)}</div><div class="pf-stat"><div class="pf-stat-lbl">ROAS</div><div class="pf-stat-val">${c.roas!=null?fR(c.roas):'—'}</div>${pl(c.roas,p.roas,fR,1)}</div><div class="pf-stat"><div class="pf-stat-lbl">CVR</div><div class="pf-stat-val">${c.cvr!=null?fP(c.cvr):'—'}</div>${pl(c.cvr,p.cvr,fP,1)}</div><div class="pf-stat"><div class="pf-stat-lbl">Orders</div><div class="pf-stat-val">${fI(c.or)}</div>${pl(c.or,p.or,fI,1)}</div></div><div class="tbl-wrap" style="margin-top:4px"><table class="camp-tbl"><thead><tr><th>Campaign</th><th>Seg</th><th class="num">Revenue</th><th class="num">Rev Δ</th><th class="num">Spend</th><th class="num">Spend Δ</th><th class="num">ROAS</th><th class="num">ROAS Δ</th><th class="num">CVR</th><th class="num">CVR Δ</th></tr></thead><tbody>${cr}</tbody></table></div></div></div>`;
+  return`<div class="pf-block${isBG?' is-b':''}">
+    <div class="pf-header" onclick="cTogglePf('cpf-${i}')">
+      <div class="pf-name-row"><span class="pf-name">${pf.name}</span><span style="font-size:10px;color:var(--t2)">${pf.campaigns.length} campaign${pf.campaigns.length!==1?'s':''}</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="pf-summary"><span>${f$(c.rv)} rev ${pill(rD,fPct,1)}</span><span>${f$(c.sp)} spend ${pill(sD,fPct,0)}</span><span>${c.roas!=null?fR(c.roas):'-'} ROAS ${roD2!==null?pill(roD2,fRd,1):'—'}</span><span>${c.cvr!=null?fP(c.cvr):'-'} CVR</span></div>
+        <span class="pf-chevron" id="cchev-${i}">▼</span>
+      </div>
+    </div>
+    <div class="pf-body" id="cpf-${i}">
+      <div class="pf-stats">
+        <div class="pf-stat"><div class="pf-stat-lbl">Revenue</div><div class="pf-stat-val">${f$(c.rv)}</div>${pl(c.rv,p.rv,f$,1)}</div>
+        <div class="pf-stat"><div class="pf-stat-lbl">Spend</div><div class="pf-stat-val">${f$(c.sp)}</div>${pl(c.sp,p.sp,f$,-1)}</div>
+        <div class="pf-stat"><div class="pf-stat-lbl">ROAS</div><div class="pf-stat-val">${c.roas!=null?fR(c.roas):'—'}</div>${pl(c.roas,p.roas,fR,1)}</div>
+        <div class="pf-stat"><div class="pf-stat-lbl">CVR</div><div class="pf-stat-val">${c.cvr!=null?fP(c.cvr):'—'}</div>${pl(c.cvr,p.cvr,fP,1)}</div>
+        <div class="pf-stat"><div class="pf-stat-lbl">Orders</div><div class="pf-stat-val">${fI(c.or)}</div>${pl(c.or,p.or,fI,1)}</div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:4px">
+        <table class="camp-tbl" style="table-layout:auto"><thead><tr><th>Campaign</th><th>Seg</th><th class="num">Revenue</th><th class="num">Rev Δ</th><th class="num">Spend</th><th class="num">Spend Δ</th><th class="num">ROAS</th><th class="num">ROAS Δ</th><th class="num">CVR</th><th class="num">CVR Δ</th></tr></thead><tbody>${cr}</tbody></table>
+      </div>
+    </div>
+  </div>`;
 }
 function cRenderPfs(){
   cPfIdx=0;
@@ -416,7 +530,6 @@ function cRenderPfs(){
   const og=document.getElementById('c-pf-group-other');if(cPfsOther.length){og.style.display='';document.getElementById('c-pf-list-other').innerHTML=[...cPfsOther].sort(sf).map(p=>cPfBlock(p,false)).join('');}else og.style.display='none';
 }
 function cTogglePf(id){const b=document.getElementById(id),i=id.replace('cpf-',''),ch=document.getElementById('cchev-'+i);ch.classList.toggle('open',b.classList.toggle('open'));}
-function cSetSort(k){cSort=k;['spend','rev','roas','cvr'].forEach(x=>document.getElementById('c-tab-'+x).classList.toggle('on',x===k));cRenderTable();}
 function cSetPfSort(k){cPfSort=k;['spend','rev','roas','cvr'].forEach(x=>document.getElementById('c-ptab-'+x).classList.toggle('on',x===k));cRenderPfs();}
 function cSetView(v){['metrics','campaign','portfolio'].forEach(x=>{document.getElementById('c-view-'+x).classList.toggle('on',x===v);document.getElementById('c-'+x+'-view').style.display=x===v?'':'none';});}
 function cLoad(week,file){
@@ -426,9 +539,9 @@ function cLoad(week,file){
 function cRenderResults(){
   const{cur,prior}=cP;
   cCamps=cJoin(cur,prior);cPfsNB=buildNBPfs(cCamps.filter(c=>c.seg==='nb'));cPfB=buildBPf(cCamps.filter(c=>c.seg==='b'));cPfsOther=buildNBPfs(cCamps.filter(c=>c.seg===null));
-  const brand=cur.brand||prior.brand||'';
-  document.getElementById('c-brand-display').textContent=brand||'Campaign performance';
-  document.getElementById('app-title').textContent=brand||'WoW Comparator';
+  const brand=cur.brand||prior.brand||'PLTFRM';
+  document.getElementById('c-brand-display').textContent=brand;
+  document.getElementById('app-title').textContent=brand;
   document.getElementById('c-results-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${cCamps.length} active campaigns`;
   rChange('c-rev-pct','c-rev-abs',cur.rv,prior.rv,f$,1);rChange('c-spend-pct','c-spend-abs',cur.sp,prior.sp,f$,0);
   rCard('c-all-roas-cur','c-all-roas-prior',cur.all.roas,prior.all.roas,fR,1);rCard('c-b-roas-cur','c-b-roas-prior',cur.b.roas,prior.b.roas,fR,1);rCard('c-nb-roas-cur','c-nb-roas-prior',cur.nb.roas,prior.nb.roas,fR,1);
@@ -437,7 +550,9 @@ function cRenderResults(){
   rCard('c-impr-cur','c-impr-prior',ci,pi,fI,1);rCard('c-clicks-cur','c-clicks-prior',cur.cl,prior.cl,fI,1);rCard('c-orders-cur','c-orders-prior',cur.or,prior.or,fI,1);
   rCard('c-b-cpc-cur','c-b-cpc-prior',cur.b.cpc,prior.b.cpc,f$,-1);rCard('c-nb-cpc-cur','c-nb-cpc-prior',cur.nb.cpc,prior.nb.cpc,f$,-1);
   cRenderTable();cRenderPfs();
-  const w=[];if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected in "${cur.filename}".`});if(!cur.oc)w.push({t:'err',m:`Orders column not detected in "${cur.filename}".`});if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 in "${cur.filename}".`});if(cur.b.cnt===0)w.push({t:'warn',m:`No "| b |" campaigns found.`});if(cur.nb.cnt===0)w.push({t:'warn',m:`No "| nb |" campaigns found.`});
+  // Init resize handle after table is in DOM
+  initResize('c-resize-handle','c-th-name','c-camp-tbl','--cname-w',220);
+  const w=[];if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected.`});if(!cur.oc)w.push({t:'err',m:`Orders column not detected.`});if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0.`});if(cur.b.cnt===0)w.push({t:'warn',m:`No "| b |" campaigns found.`});if(cur.nb.cnt===0)w.push({t:'warn',m:`No "| nb |" campaigns found.`});
   document.getElementById('c-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
   document.getElementById('c-upload-view').style.display='none';document.getElementById('c-results-view').style.display='';
 }
@@ -448,25 +563,25 @@ function cReset(){
   document.getElementById('c-results-view').style.display='none';document.getElementById('c-upload-view').style.display='';cSetView('metrics');
 }
 
-/* ─── ASIN section ─────────────────────────────────────────── */
+/* ─── Products section ─────────────────────────── */
 const aP={cur:null,prior:null};
 let aAsins=[];
-let aSort='rev';
+let aSort='rev',aSortDir='desc';
 
 function aExtract(res){
   const h=res.meta.fields||[],rows=res.data;
-  // Amazon product report column variants
-  const asinCol=findCol(h,['advertised asin','asin'],['search term','keyword','query','campaign name']);
-  const skuCol =findCol(h,['advertised sku','sku'],['search term','keyword','campaign name']);
-  const sc=findCol(h,['spend','total cost (converted)','total cost','cost'],['per click','cpc','acos','of sale']);
-  // Prefer "advertised sku sales" over "total sales" for product-level reports
-  const rc=findCol(h,['7 day advertised sku sales','advertised sku sales ($)','7 day total sales','14 day total sales','sales (converted)','total sales','attributed sales','revenue','sales'],['(#)','unit','units','new-to-brand','percentage','acos','other sku']);
+  const productCol=findCol(h,['products','advertised asin','asin','product'],['search term','keyword','query','campaign name','status','type']);
+  const sc=findCol(h,['spend(usd)','spend (usd)','total cost (converted)','total cost','spend','cost'],['per click','cpc','acos','of sale']);
+  const rc=findCol(h,['sales(usd)','sales (usd)','7 day advertised sku sales','advertised sku sales','7 day total sales','14 day total sales','sales (converted)','total sales','revenue','sales'],['ntb','new-to-brand','% of','percentage','acos','other sku']);
   const cc=findCol(h,['clicks'],[]);
-  const oc=findCol(h,['7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','purchases','total orders (#)','total orders','orders (#)','orders'],['new-to-brand','new to brand','unit']);
+  const oc=findCol(h,['orders','7 day total orders (#)','14 day total orders (#)','7 day total orders','purchases','total orders (#)','total orders','orders (#)'],['ntb','new-to-brand','% of','unit']);
   const by={};let tSp=0,tRv=0,tCl=0,tOr=0;
   for(const row of rows){
-    const asin=asinCol?(row[asinCol]||'').trim():'';if(!asin||asin.toLowerCase()==='total'||asin.length<1)continue;
-    const sku=skuCol?(row[skuCol]||'').trim():'';
+    const raw=productCol?(row[productCol]||'').trim():'';
+    if(!raw||raw.toLowerCase()==='total'||raw===''||raw.toLowerCase()==='products')continue;
+    let asin=raw,sku='';
+    const dashIdx=raw.indexOf('-');
+    if(dashIdx>0&&dashIdx<=10){const fp=raw.substring(0,dashIdx);if(/^[A-Z0-9]{8,12}$/.test(fp)){asin=fp;sku=raw.substring(dashIdx+1);}}
     const cl=pn(row[cc]),or=pn(row[oc]),sp=pn(row[sc]),rv=pn(row[rc]);
     tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;
     if(!by[asin])by[asin]={asin,sku,cl:0,or:0,sp:0,rv:0};
@@ -474,7 +589,7 @@ function aExtract(res){
     if(sku)by[asin].sku=sku;
   }
   for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.roas=c.sp>0?c.rv/c.sp:null;}
-  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,cvr:tCl>0?(tOr/tCl)*100:null,roas:tSp>0?tRv/tSp:null,asinCol,skuCol,sc:sc,rc:rc,cc:cc,oc:oc,by};
+  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,cvr:tCl>0?(tOr/tCl)*100:null,roas:tSp>0?tRv/tSp:null,productCol,sc,rc,cc,oc,by};
 }
 function aJoin(cur,pr){
   return Array.from(new Set([...Object.keys(cur.by),...Object.keys(pr.by)]))
@@ -482,7 +597,10 @@ function aJoin(cur,pr){
     .filter(a=>a.cur&&(a.cur.sp>0||a.cur.cl>0));
 }
 function aRenderTable(){
-  const sorted=[...aAsins].sort((a,b)=>aSort==='rev'?(b.cur?.rv||0)-(a.cur?.rv||0):aSort==='spend'?(b.cur?.sp||0)-(a.cur?.sp||0):aSort==='roas'?(b.cur?.roas||0)-(a.cur?.roas||0):aSort==='orders'?(b.cur?.or||0)-(a.cur?.or||0):(b.cur?.cvr||0)-(a.cur?.cvr||0));
+  updateSortIcons('a-si-',aSort,aSortDir,['rev','spend','roas','orders','cvr']);
+  const dir=aSortDir==='asc'?1:-1;
+  const val=a=>aSort==='rev'?(a.cur?.rv||0):aSort==='spend'?(a.cur?.sp||0):aSort==='roas'?(a.cur?.roas||0):aSort==='orders'?(a.cur?.or||0):(a.cur?.cvr||0);
+  const sorted=[...aAsins].sort((a,b)=>(val(a)-val(b))*dir*-1);
   document.getElementById('a-body').innerHTML=sorted.map(a=>{
     const cur=a.cur,pr=a.prior;
     const rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp);
@@ -490,20 +608,21 @@ function aRenderTable(){
     const orD=pd(cur?.or,pr?.or);
     const cvD=cur?.cvr!=null&&pr?.cvr!=null?cur.cvr-pr.cvr:null;
     return`<tr>
-      <td><span style="font-family:var(--m);font-size:11px;font-weight:500">${a.asin}</span></td>
-      <td style="font-size:10px;color:var(--t2);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.sku}">${a.sku||'—'}</td>
+      <td class="td-campaign">
+        <div style="font-family:var(--m);font-size:11px;font-weight:500">${a.asin}</div>
+        ${a.sku?`<div style="font-size:10px;color:var(--t2)">${a.sku}</div>`:''}
+      </td>
       <td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td>
       <td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td>
       <td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td>
       <td class="num">${cur?fI(cur.or):'—'}</td><td class="num">${pill(orD,fPct,1)}</td>
-      <td class="num">${cur?fI(cur.cl):'—'}</td>
       <td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="13" style="text-align:center;padding:1.5rem;color:var(--t2)">No active ASINs found.</td></tr>';
+  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--t2)">No active products found.</td></tr>';
   const lbl=aSort==='rev'?'revenue':aSort==='spend'?'spend':aSort==='roas'?'ROAS':aSort==='orders'?'orders':'CVR';
-  document.getElementById('a-tbl-note').textContent=`${sorted.length} active ASINs · sorted by ${lbl}`;
+  document.getElementById('a-tbl-note').textContent=`${sorted.length} active products · sorted by ${lbl}`;
 }
-function aSetSort(k){aSort=k;['rev','spend','roas','orders','cvr'].forEach(x=>document.getElementById('a-tab-'+x).classList.toggle('on',x===k));aRenderTable();}
+function aSetSort(k){if(aSort===k){aSortDir=aSortDir==='desc'?'asc':'desc';}else{aSort=k;aSortDir='desc';}aRenderTable();}
 function aLoad(week,file){
   if(!file)return;
   Papa.parse(file,{header:true,skipEmptyLines:true,
@@ -514,7 +633,7 @@ function aLoad(week,file){
 function aRenderResults(){
   const{cur,prior}=aP;
   aAsins=aJoin(cur,prior);
-  document.getElementById('a-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${aAsins.length} active ASINs`;
+  document.getElementById('a-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${aAsins.length} active products`;
   rCard('a-rev-cur',   'a-rev-prior',   cur.rv,   prior.rv,   f$,1);
   rCard('a-spend-cur', 'a-spend-prior', cur.sp,   prior.sp,   f$,0);
   rCard('a-roas-cur',  'a-roas-prior',  cur.roas, prior.roas, fR,1);
@@ -522,21 +641,24 @@ function aRenderResults(){
   rCard('a-clicks-cur','a-clicks-prior',cur.cl,   prior.cl,   fI,1);
   rCard('a-cvr-cur',   'a-cvr-prior',   cur.cvr,  prior.cvr,  fP,1);
   aRenderTable();
-  // Show column hint
+  initResize('a-resize-handle','a-th-name','a-camp-tbl','--cname-w',160);
   const hint=document.getElementById('a-hint');hint.style.display='';
-  hint.innerHTML=`Detected — ASIN: <b>${cur.asinCol||'NOT FOUND'}</b> · Revenue: <b>${cur.rc||'NOT FOUND'}</b> · Spend: <b>${cur.sc||'NOT FOUND'}</b> · Orders: <b>${cur.oc||'NOT FOUND'}</b>`;
+  hint.innerHTML=`Detected — Product: <b>${cur.productCol||'NOT FOUND'}</b> · Revenue: <b>${cur.rc||'NOT FOUND'}</b> · Spend: <b>${cur.sc||'NOT FOUND'}</b> · Orders: <b>${cur.oc||'NOT FOUND'}</b>`;
   const w=[];
-  if(!cur.asinCol)w.push({t:'err',m:`ASIN column not found in "${cur.filename}". Expected "Advertised ASIN" — make sure you're uploading a Sponsored Products advertised product report, not a campaign or keyword report.`});
-  if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected in "${cur.filename}".`});
-  if(!cur.oc)w.push({t:'err',m:`Orders column not detected in "${cur.filename}".`});
-  if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 in "${cur.filename}" despite detecting "${cur.oc}".`});
+  if(!cur.productCol)w.push({t:'err',m:`Product/ASIN column not found. Expected "Products" or "Advertised ASIN".`});
+  if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected. Expected "Sales(USD)".`});
+  if(!cur.oc)w.push({t:'err',m:`Orders column not detected.`});
+  if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 despite detecting "${cur.oc}".`});
   document.getElementById('a-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
-  document.getElementById('a-upload-view').style.display='none';document.getElementById('a-results-view').style.display='';
+  document.getElementById('a-upload-view').style.display='none';
+  document.getElementById('a-results-view').style.display='';
 }
 function aReset(){
   aP.cur=aP.prior=null;aAsins=[];
   ['cur','prior'].forEach(w=>{document.getElementById('a-dz-'+w).classList.remove('ok');document.getElementById('a-lbl-'+w).textContent=w==='cur'?'Current week':'Prior week';document.getElementById('a-f-'+w).value='';});
-  document.getElementById('a-hint').style.display='none';document.getElementById('a-results-view').style.display='none';document.getElementById('a-upload-view').style.display='';
+  document.getElementById('a-hint').style.display='none';
+  document.getElementById('a-results-view').style.display='none';
+  document.getElementById('a-upload-view').style.display='';
 }
 </script>
 </body>
