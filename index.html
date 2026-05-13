@@ -65,9 +65,9 @@
     .sort-icon { font-size: 9px; margin-left: 3px; opacity: .4; }
     .sort-icon.active { opacity: 1; color: var(--t1); }
 
-    /* Campaign name cell — resizable via JS */
-    .th-campaign { width: var(--cname-w, 220px); min-width: 120px; }
-    .td-campaign { width: var(--cname-w, 220px); vertical-align: middle; }
+    /* Campaign / product name column — resizable */
+    .th-campaign { width: var(--cname-w, var(--bname-w, 220px)); min-width: 120px; position: relative; }
+    .td-campaign { vertical-align: middle; }
     .cname { font-size: 11px; color: var(--t1); white-space: normal; word-break: break-word; display: block; }
 
     /* Resize handle */
@@ -127,6 +127,7 @@
   <div class="top-nav">
     <button class="tnav on" id="tnav-campaigns" onclick="switchSection('campaigns')">Campaigns</button>
     <button class="tnav"    id="tnav-asins"     onclick="switchSection('asins')">Products</button>
+    <button class="tnav"    id="tnav-biz"        onclick="switchSection('biz')">Business Report</button>
   </div>
 
   <!-- ═══ CAMPAIGNS ═══ -->
@@ -315,6 +316,87 @@
     </div>
   </div>
 
+  <!-- ═══ BUSINESS REPORT ═══ -->
+  <div id="section-biz" style="display:none">
+    <div id="b-upload-view">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:4px">Upload Amazon Business Reports (Sales & Traffic by ASIN).</p>
+      <p style="font-size:11px;color:var(--t2);margin-bottom:1rem">Prior week first, then current week. Shows implied price, sessions, Buy Box %, and organic CVR per ASIN.</p>
+      <div class="g2">
+        <div class="dz" id="b-dz-prior" onclick="document.getElementById('b-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();bLoad('prior',event.dataTransfer.files[0])">
+          <input type="file" id="b-f-prior" accept=".csv" style="display:none" onchange="bLoad('prior',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="b-lbl-prior">Prior week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+        <div class="dz" id="b-dz-cur" onclick="document.getElementById('b-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();bLoad('cur',event.dataTransfer.files[0])">
+          <input type="file" id="b-f-cur" accept=".csv" style="display:none" onchange="bLoad('cur',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="b-lbl-cur">Current week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="b-results-view" style="display:none;padding-bottom:2rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div>
+          <p style="font-size:16px;font-weight:500">Business report — ASIN summary</p>
+          <p style="font-size:11px;color:var(--t2);margin-top:2px" id="b-sub"></p>
+        </div>
+        <button class="rst-btn" onclick="bReset()">↺ Reset</button>
+      </div>
+
+      <!-- Portfolio totals -->
+      <div class="slbl">Portfolio totals</div>
+      <div class="g3" style="margin-bottom:12px">
+        <div class="metric-card"><div class="mc-lbl">Ordered Sales</div><div class="mc-val" id="b-sales-cur">—</div><div class="mc-prior" id="b-sales-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">Units Ordered</div><div class="mc-val" id="b-units-cur">—</div><div class="mc-prior" id="b-units-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">Sessions</div><div class="mc-val" id="b-sessions-cur">—</div><div class="mc-prior" id="b-sessions-prior"></div></div>
+      </div>
+      <div class="g3" style="margin-bottom:16px">
+        <div class="metric-card"><div class="mc-lbl">Avg. Implied Price</div><div class="mc-val" id="b-price-cur">—</div><div class="mc-prior" id="b-price-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">Buy Box %</div><div class="mc-val" id="b-bb-cur">—</div><div class="mc-prior" id="b-bb-prior"></div></div>
+        <div class="metric-card"><div class="mc-lbl">Organic CVR</div><div class="mc-val" id="b-cvr-cur">—</div><div class="mc-prior" id="b-cvr-prior"></div></div>
+      </div>
+
+      <!-- ASIN table -->
+      <div class="tab-row">
+        <button class="stab on" id="b-tab-sales"    onclick="bSetSort('sales')">By sales</button>
+        <button class="stab"    id="b-tab-units"    onclick="bSetSort('units')">By units</button>
+        <button class="stab"    id="b-tab-sessions" onclick="bSetSort('sessions')">By sessions</button>
+        <button class="stab"    id="b-tab-price"    onclick="bSetSort('price')">By price</button>
+        <button class="stab"    id="b-tab-bb"       onclick="bSetSort('bb')">By Buy Box</button>
+        <button class="stab"    id="b-tab-cvr"      onclick="bSetSort('cvr')">By CVR</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="camp-tbl" id="b-camp-tbl">
+          <thead><tr>
+            <th class="th-campaign" id="b-th-name">
+              ASIN / Title
+              <div class="resize-handle" id="b-resize-handle"></div>
+            </th>
+            <th class="num sortable" onclick="bSetSort('sales')">Sales <span class="sort-icon" id="b-si-sales">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="bSetSort('units')">Units <span class="sort-icon" id="b-si-units">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="bSetSort('price')">Implied Price <span class="sort-icon" id="b-si-price">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="bSetSort('sessions')">Sessions <span class="sort-icon" id="b-si-sessions">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="bSetSort('bb')">Buy Box % <span class="sort-icon" id="b-si-bb">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="bSetSort('cvr')">Org. CVR <span class="sort-icon" id="b-si-cvr">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+          </tr></thead>
+          <tbody id="b-body"></tbody>
+        </table>
+      </div>
+      <div class="tbl-note" id="b-tbl-note"></div>
+      <div id="b-hint" class="hint-box" style="display:none"></div>
+      <div id="b-warn-area"></div>
+    </div>
+  </div>
+
 </div><!-- /container -->
 <script>
 /* ─── Shared utils ─────────────────────────────── */
@@ -348,7 +430,7 @@ function rCard(ci,pi,cv,pv,fn,gd){
   pe.textContent=`${a} ${fn(pv)} prior week`;pe.className=`mc-prior ${g===null?'neu':g?'pos':'neg'}`;
 }
 function switchSection(s){
-  ['campaigns','asins'].forEach(x=>{
+  ['campaigns','asins','biz'].forEach(x=>{
     document.getElementById('tnav-'+x).classList.toggle('on',x===s);
     document.getElementById('section-'+x).style.display=x===s?'':'none';
   });
@@ -418,7 +500,7 @@ function cExtract(res){
   const h=res.meta.fields||[],rows=res.data;
   const nc=findCol(h,['campaign name'],[]);
   const sc=findCol(h,['total cost (converted)','total cost','spend','cost'],['per click','cpc','acos','of sale']);
-  const rc=findCol(h,['sales (converted)','7 day total sales','14 day total sales','total sales','attributed sales','revenue','sales'],['(#)','unit','units','new-to-brand','percentage','acos']);
+  const rc=findCol(h,['sales (converted)','sales(usd)','sales (usd)','7 day total sales','14 day total sales','total sales','attributed sales','revenue','sales'],['(#)','units ordered','new-to-brand','new to brand','ntb','percentage','% of','acos']);
   const cc=findCol(h,['clicks'],[]);
   const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
   const ic=findCol(h,['impressions'],[]);
@@ -465,9 +547,9 @@ function cRenderTable(){
   let camps=[...cCamps];
   if(cSeg==='b')camps=camps.filter(c=>c.seg==='b');
   if(cSeg==='nb')camps=camps.filter(c=>c.seg==='nb');
-  const dir=cSortDir==='asc'?1:-1;
+  const dir=cSortDir==='desc'?-1:1;
   const val=c=>cSort==='rev'?(c.cur?.rv||0):cSort==='spend'?(c.cur?.sp||0):cSort==='roas'?(c.cur?.roas||0):(c.cur?.cvr||0);
-  camps.sort((a,b)=>(val(a)-val(b))*dir*-1);
+  camps.sort((a,b)=>(val(b)-val(a))*dir);
   updateSortIcons('c-si-',cSort,cSortDir,['rev','spend','roas','cvr']);
   document.getElementById('c-camp-body').innerHTML=camps.map(c=>{
     const cur=c.cur,pr=c.prior,rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp),roD=roasD(cur,pr),cvD=cvrD(cur,pr);
@@ -598,9 +680,9 @@ function aJoin(cur,pr){
 }
 function aRenderTable(){
   updateSortIcons('a-si-',aSort,aSortDir,['rev','spend','roas','orders','cvr']);
-  const dir=aSortDir==='asc'?1:-1;
+  const dir=aSortDir==='desc'?-1:1;
   const val=a=>aSort==='rev'?(a.cur?.rv||0):aSort==='spend'?(a.cur?.sp||0):aSort==='roas'?(a.cur?.roas||0):aSort==='orders'?(a.cur?.or||0):(a.cur?.cvr||0);
-  const sorted=[...aAsins].sort((a,b)=>(val(a)-val(b))*dir*-1);
+  const sorted=[...aAsins].sort((a,b)=>(val(b)-val(a))*dir);
   document.getElementById('a-body').innerHTML=sorted.map(a=>{
     const cur=a.cur,pr=a.prior;
     const rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp);
@@ -659,6 +741,185 @@ function aReset(){
   document.getElementById('a-hint').style.display='none';
   document.getElementById('a-results-view').style.display='none';
   document.getElementById('a-upload-view').style.display='';
+}
+
+/* ─── Business Report section ──────────────────── */
+const bP={cur:null,prior:null};
+let bAsins=[];
+let bSort='sales', bSortDir='desc';
+
+function bExtract(res){
+  const h=res.meta.fields||[],rows=res.data;
+  // Column detection for Business Report (Sales & Traffic by ASIN)
+  const asinCol  = findCol(h,['(child) asin','child asin','asin'],['parent','search term']);
+  const titleCol = findCol(h,['title','product name','name'],['session','page','order','sales','buy']);
+  const salesCol = findCol(h,['ordered product sales'],['b2b','- b2b']);
+  const unitsCol = findCol(h,['units ordered'],['b2b','- b2b']);
+  const sessCol  = findCol(h,['sessions - total','sessions'],['b2b','- b2b','percentage','%']);
+  const bbCol    = findCol(h,['featured offer (buy box) percentage','buy box percentage'],['b2b','- b2b']);
+  const cvrCol   = findCol(h,['unit session percentage'],['b2b','- b2b']);
+
+  const by={};
+  let tSales=0,tUnits=0,tSessions=0,tBBSum=0,tBBCount=0;
+
+  for(const row of rows){
+    const asin=asinCol?(row[asinCol]||'').trim():'';
+    if(!asin||asin.toLowerCase()==='total'||asin==='')continue;
+    const title = titleCol?(row[titleCol]||'').trim():'';
+    const sales    = pn(row[salesCol]);
+    const units    = pn(row[unitsCol]);
+    const sessions = pn(row[sessCol]);
+    const bb       = pn(row[bbCol]);     // % 0–100
+    const cvr      = pn(row[cvrCol]);    // % 0–1 or 0–100, need to normalise
+    // Normalise CVR: Business Report uses decimal (e.g. 0.1354 = 13.54%)
+    const cvrPct = cvr > 1 ? cvr : cvr * 100;
+    // Buy Box: may come as "99.30%" → pn strips % → 99.3, or as 0.993 → need to normalise
+    const bbPct = bb > 1 ? bb : bb * 100;
+
+    tSales+=sales; tUnits+=units; tSessions+=sessions;
+    if(bbPct>0){tBBSum+=bbPct; tBBCount++;}
+
+    if(!by[asin])by[asin]={asin,title,sales:0,units:0,sessions:0,bbSum:0,bbCount:0,cvrSum:0,cvrCount:0};
+    by[asin].sales    += sales;
+    by[asin].units    += units;
+    by[asin].sessions += sessions;
+    if(bbPct>0){by[asin].bbSum+=bbPct; by[asin].bbCount++;}
+    if(cvrPct>0){by[asin].cvrSum+=cvrPct; by[asin].cvrCount++;}
+  }
+
+  // Compute derived per-ASIN metrics
+  for(const c of Object.values(by)){
+    c.price = c.units>0  ? c.sales/c.units    : null;
+    c.bb    = c.bbCount  ? c.bbSum/c.bbCount  : null;
+    c.cvr   = c.cvrCount ? c.cvrSum/c.cvrCount: null;
+  }
+
+  // Portfolio averages
+  const avgPrice    = tUnits>0    ? tSales/tUnits          : null;
+  const avgBB       = tBBCount    ? tBBSum/tBBCount         : null;
+
+  return{
+    sales:tSales, units:tUnits, sessions:tSessions,
+    avgPrice, avgBB,
+    cvr: null, // computed from sum below
+    asinCol, salesCol, unitsCol, sessCol, bbCol, cvrCol,
+    by
+  };
+}
+
+function bJoin(cur,pr){
+  return Array.from(new Set([...Object.keys(cur.by),...Object.keys(pr.by)]))
+    .map(asin=>({asin, title:cur.by[asin]?.title||pr.by[asin]?.title||'', cur:cur.by[asin]||null, prior:pr.by[asin]||null}))
+    .filter(a=>a.cur&&(a.cur.sales>0||a.cur.sessions>0));
+}
+
+function bRenderTable(){
+  updateSortIcons('b-si-',bSort,bSortDir,['sales','units','sessions','price','bb','cvr']);
+  const dir=bSortDir==='desc'?-1:1;
+  const val=a=>{
+    const c=a.cur||{};
+    if(bSort==='sales')    return c.sales||0;
+    if(bSort==='units')    return c.units||0;
+    if(bSort==='sessions') return c.sessions||0;
+    if(bSort==='price')    return c.price||0;
+    if(bSort==='bb')       return c.bb||0;
+    return c.cvr||0;
+  };
+  const sorted=[...bAsins].sort((a,b)=>(val(b)-val(a))*dir);
+
+  document.getElementById('b-body').innerHTML=sorted.map(a=>{
+    const cur=a.cur, pr=a.prior;
+    const salesD    = pd(cur?.sales,   pr?.sales);
+    const unitsD    = pd(cur?.units,   pr?.units);
+    const priceD    = cur?.price!=null&&pr?.price!=null ? cur.price-pr.price  : null;
+    const sessD     = pd(cur?.sessions,pr?.sessions);
+    const bbD       = cur?.bb!=null   &&pr?.bb!=null    ? cur.bb-pr.bb        : null;
+    const cvrD2     = cur?.cvr!=null  &&pr?.cvr!=null   ? cur.cvr-pr.cvr      : null;
+
+    // Short title (first 50 chars)
+    const shortTitle = a.title ? `<div style="font-size:10px;color:var(--t2);margin-top:2px;white-space:normal;word-break:break-word">${a.title.slice(0,60)}${a.title.length>60?'…':''}</div>` : '';
+
+    return`<tr>
+      <td class="td-campaign">
+        <div style="font-family:var(--m);font-size:11px;font-weight:500">${a.asin}</div>
+        ${shortTitle}
+      </td>
+      <td class="num">${cur?f$(cur.sales):'—'}</td>
+      <td class="num">${pill(salesD,fPct,1)}</td>
+      <td class="num">${cur?fI(cur.units):'—'}</td>
+      <td class="num">${pill(unitsD,fPct,1)}</td>
+      <td class="num">${cur?.price!=null?f$(cur.price):'—'}</td>
+      <td class="num">${priceD!==null?pill(priceD,v=>(v>=0?'+':'')+f$(Math.abs(v)),1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${cur?fI(cur.sessions):'—'}</td>
+      <td class="num">${pill(sessD,fPct,1)}</td>
+      <td class="num">${cur?.bb!=null?fP(cur.bb):'—'}</td>
+      <td class="num">${bbD!==null?pill(bbD,v=>(v>=0?'+':'')+v.toFixed(1)+' pp',1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td>
+      <td class="num">${cvrD2!==null?pill(cvrD2,v=>(v>=0?'+':'')+v.toFixed(2)+' pp',1):'<span class="delta-pill pill-neu">—</span>'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="13" style="text-align:center;padding:1.5rem;color:var(--t2)">No ASINs found.</td></tr>';
+
+  const lbl=bSort==='sales'?'sales':bSort==='units'?'units':bSort==='sessions'?'sessions':bSort==='price'?'price':bSort==='bb'?'Buy Box':'CVR';
+  document.getElementById('b-tbl-note').textContent=`${sorted.length} ASINs · sorted by ${lbl}`;
+}
+
+function bSetSort(k){
+  if(bSort===k){bSortDir=bSortDir==='desc'?'asc':'desc';}else{bSort=k;bSortDir='desc';}
+  bRenderTable();
+}
+
+function bLoad(week,file){
+  if(!file)return;
+  Papa.parse(file,{header:true,skipEmptyLines:true,
+    complete(res){
+      bP[week]={...bExtract(res),filename:file.name};
+      document.getElementById('b-lbl-'+week).textContent=file.name;
+      document.getElementById('b-dz-'+week).classList.add('ok');
+      if(bP.cur&&bP.prior)bRenderResults();
+    },error(){alert('Could not parse file.');}
+  });
+}
+
+function bRenderResults(){
+  const{cur,prior}=bP;
+  bAsins=bJoin(cur,prior);
+  document.getElementById('b-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${bAsins.length} ASINs`;
+
+  // Portfolio-level totals
+  rCard('b-sales-cur',   'b-sales-prior',    cur.sales,    prior.sales,    f$, 1);
+  rCard('b-units-cur',   'b-units-prior',    cur.units,    prior.units,    fI, 1);
+  rCard('b-sessions-cur','b-sessions-prior', cur.sessions, prior.sessions, fI, 1);
+  rCard('b-price-cur',   'b-price-prior',    cur.avgPrice, prior.avgPrice, f$, 1);
+  rCard('b-bb-cur',      'b-bb-prior',       cur.avgBB,    prior.avgBB,    fP, 1);
+
+  // Portfolio CVR = weighted average
+  const curCvr  = bAsins.length ? bAsins.filter(a=>a.cur?.cvr!=null).reduce((s,a)=>s+a.cur.cvr,0) / bAsins.filter(a=>a.cur?.cvr!=null).length : null;
+  const priorCvr= bAsins.length ? bAsins.filter(a=>a.prior?.cvr!=null).reduce((s,a)=>s+a.prior.cvr,0) / bAsins.filter(a=>a.prior?.cvr!=null).length : null;
+  rCard('b-cvr-cur','b-cvr-prior', isNaN(curCvr)?null:curCvr, isNaN(priorCvr)?null:priorCvr, fP, 1);
+
+  bRenderTable();
+  initResize('b-resize-handle','b-th-name','b-camp-tbl','--bname-w',200);
+
+  // Hint
+  const hint=document.getElementById('b-hint');hint.style.display='';
+  hint.innerHTML=`Detected — ASIN: <b>${cur.asinCol||'NOT FOUND'}</b> · Sales: <b>${cur.salesCol||'NOT FOUND'}</b> · Units: <b>${cur.unitsCol||'NOT FOUND'}</b> · Sessions: <b>${cur.sessCol||'NOT FOUND'}</b> · Buy Box: <b>${cur.bbCol||'NOT FOUND'}</b> · CVR: <b>${cur.cvrCol||'NOT FOUND'}</b>`;
+
+  const w=[];
+  if(!cur.asinCol) w.push({t:'err', m:`ASIN column not found. Expected "(Child) ASIN".`});
+  if(!cur.salesCol)w.push({t:'warn',m:`Sales column not found. Expected "Ordered Product Sales".`});
+  if(!cur.sessCol) w.push({t:'warn',m:`Sessions column not found. Expected "Sessions - Total".`});
+  document.getElementById('b-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
+
+  document.getElementById('b-upload-view').style.display='none';
+  document.getElementById('b-results-view').style.display='';
+}
+
+function bReset(){
+  bP.cur=bP.prior=null;bAsins=[];
+  ['cur','prior'].forEach(w=>{document.getElementById('b-dz-'+w).classList.remove('ok');document.getElementById('b-lbl-'+w).textContent=w==='cur'?'Current week':'Prior week';document.getElementById('b-f-'+w).value='';});
+  document.getElementById('b-hint').style.display='none';
+  document.getElementById('b-results-view').style.display='none';
+  document.getElementById('b-upload-view').style.display='';
 }
 </script>
 </body>
