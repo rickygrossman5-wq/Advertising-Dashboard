@@ -127,7 +127,8 @@
   <div class="top-nav">
     <button class="tnav on" id="tnav-campaigns" onclick="switchSection('campaigns')">Campaigns</button>
     <button class="tnav"    id="tnav-asins"     onclick="switchSection('asins')">Products</button>
-    <button class="tnav"    id="tnav-biz"        onclick="switchSection('biz')">Business Report</button>
+    <button class="tnav"    id="tnav-biz"       onclick="switchSection('biz')">Business Report</button>
+    <button class="tnav"    id="tnav-sqp"       onclick="switchSection('sqp')">Search Terms</button>
   </div>
 
   <!-- ═══ CAMPAIGNS ═══ -->
@@ -397,6 +398,67 @@
     </div>
   </div>
 
+  <!-- ═══ SEARCH QUERY PERFORMANCE ═══ -->
+  <div id="section-sqp" style="display:none">
+    <div id="s-upload-view">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:4px">Upload Search Query Performance (Brand View) reports.</p>
+      <p style="font-size:11px;color:var(--t2);margin-bottom:1rem">Prior week first, then current week. Compares search volume, brand share, purchases, and more per query.</p>
+      <div class="g2">
+        <div class="dz" id="s-dz-prior" onclick="document.getElementById('s-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();sLoad('prior',event.dataTransfer.files[0])">
+          <input type="file" id="s-f-prior" accept=".csv" style="display:none" onchange="sLoad('prior',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="s-lbl-prior">Prior week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+        <div class="dz" id="s-dz-cur" onclick="document.getElementById('s-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();sLoad('cur',event.dataTransfer.files[0])">
+          <input type="file" id="s-f-cur" accept=".csv" style="display:none" onchange="sLoad('cur',this.files[0])">
+          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:3px" id="s-lbl-cur">Current week</div>
+          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="s-results-view" style="display:none;padding-bottom:2rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <div>
+          <p style="font-size:16px;font-weight:500">Search query performance</p>
+          <p style="font-size:11px;color:var(--t2);margin-top:2px" id="s-sub"></p>
+        </div>
+        <button class="rst-btn" onclick="sReset()">↺ Reset</button>
+      </div>
+
+      <!-- Search filter -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+        <input type="text" id="s-search" placeholder="Filter queries…" oninput="sRenderTable()"
+          style="font-size:11px;padding:5px 10px;border:0.5px solid var(--br);border-radius:20px;background:var(--bg1);color:var(--t1);width:160px;outline:none">
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="camp-tbl" id="s-camp-tbl">
+          <thead><tr>
+            <th class="th-campaign" id="s-th-name">
+              Search Query
+              <div class="resize-handle" id="s-resize-handle"></div>
+            </th>
+            <th class="num sortable" onclick="sSetSort('score')">Score <span class="sort-icon" id="s-si-score">↕</span></th>
+            <th class="num sortable" onclick="sSetSort('vol')">Volume <span class="sort-icon" id="s-si-vol">↓</span></th>
+            <th class="num" style="width:52px">Vol Δ</th>
+            <th class="num sortable" onclick="sSetSort('bimpshare')">Imp. Share <span class="sort-icon" id="s-si-bimpshare">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="sSetSort('bpurch')">Brand Purch. <span class="sort-icon" id="s-si-bpurch">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+            <th class="num sortable" onclick="sSetSort('bpurchshare')">Purch. Share <span class="sort-icon" id="s-si-bpurchshare">↕</span></th>
+            <th class="num" style="width:52px">Δ</th>
+          </tr></thead>
+          <tbody id="s-body"></tbody>
+        </table>
+      </div>
+      <div class="tbl-note" id="s-tbl-note"></div>
+      <div id="s-warn-area"></div>
+    </div>
+  </div>
+
 </div><!-- /container -->
 <script>
 /* ─── Shared utils ─────────────────────────────── */
@@ -405,7 +467,7 @@ function pn(v){if(!v&&v!==0)return 0;const n=parseFloat(String(v).replace(/[$,%\
 const f$=v=>'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fP=v=>v.toFixed(2)+'%',fR=v=>v.toFixed(2)+'x',fI=v=>Math.round(v).toLocaleString('en-US');
 const fPct=v=>(v>=0?'+':'')+v.toFixed(1)+'%',fPp=v=>(v>=0?'+':'')+v.toFixed(2)+' pp',fRd=v=>(v>=0?'+':'')+v.toFixed(2)+'x';
-function pd(c,p){if(c===null||p===null)return null;if(p===0)return c>0?Infinity:0;return(c-p)/Math.abs(p)*100;}
+function pd(c,p){if(c==null||p==null)return null;if(p===0)return c>0?Infinity:0;return(c-p)/Math.abs(p)*100;}
 function ad(c,p){if(c===null||p===null)return null;return c-p;}
 function roasD(c,p){if(!c||!p||c.roas===null||p.roas===null)return null;return c.roas-p.roas;}
 function cvrD(c,p){if(!c||!p)return null;return(c.cvr??0)-(p.cvr??0);}
@@ -430,7 +492,7 @@ function rCard(ci,pi,cv,pv,fn,gd){
   pe.textContent=`${a} ${fn(pv)} prior week`;pe.className=`mc-prior ${g===null?'neu':g?'pos':'neg'}`;
 }
 function switchSection(s){
-  ['campaigns','asins','biz'].forEach(x=>{
+  ['campaigns','asins','biz','sqp'].forEach(x=>{
     document.getElementById('tnav-'+x).classList.toggle('on',x===s);
     document.getElementById('section-'+x).style.display=x===s?'':'none';
   });
@@ -499,7 +561,7 @@ function detectBrand(rows,nc){if(!nc)return'';const cnt={};for(const r of rows){
 function cExtract(res){
   const h=res.meta.fields||[],rows=res.data;
   const nc=findCol(h,['campaign name'],[]);
-  const sc=findCol(h,['total cost (converted)','total cost','spend','cost'],['per click','cpc','acos','of sale']);
+  const sc=findCol(h,['total cost (converted)','total cost','spend','cost'],['per click','cpc','acos','of sale','type','budget']);
   const rc=findCol(h,['sales (converted)','sales(usd)','sales (usd)','7 day total sales','14 day total sales','total sales','attributed sales','revenue','sales'],['(#)','units ordered','new-to-brand','new to brand','ntb','percentage','% of','acos']);
   const cc=findCol(h,['clicks'],[]);
   const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
@@ -920,6 +982,174 @@ function bReset(){
   document.getElementById('b-hint').style.display='none';
   document.getElementById('b-results-view').style.display='none';
   document.getElementById('b-upload-view').style.display='';
+}
+
+/* ─── SQP section ──────────────────────────────── */
+const sP={cur:null,prior:null};
+let sQueries=[];
+let sSort='vol', sSortDir='desc';
+
+function sExtract(rawRows){
+  if(!rawRows||rawRows.length<3)return{queries:{},totals:{}};
+  // Find header row dynamically — look for the row that starts with "search query"
+  let headerIdx=-1;
+  for(let i=0;i<Math.min(6,rawRows.length);i++){
+    if((rawRows[i][0]||'').toLowerCase().trim()==='search query'){headerIdx=i;break;}
+  }
+  if(headerIdx===-1)return{queries:{},totals:{}};
+  const headers=rawRows[headerIdx];
+  const ci=k=>headers.findIndex(h=>(h||'').toLowerCase().trim()===k.toLowerCase().trim());
+
+  const iQuery      =ci('Search Query');
+  const iScore      =ci('Search Query Score');
+  const iVol        =ci('Search Query Volume');
+  const iImpShare   =ci('Impressions: Brand Share %');
+  const iPurchTotal =ci('Purchases: Total Count');
+  const iPurchRate  =ci('Purchases: Purchase Rate %');
+  const iPurchBrand =ci('Purchases: Brand Count');
+  const iPurchShare =ci('Purchases: Brand Share %');
+
+  const queries={};
+  let tBPurch=0,tTPurch=0,tImpSum=0,tImpCnt=0,tPSharSum=0,tPSharCnt=0;
+
+  for(let i=headerIdx+1;i<rawRows.length;i++){
+    const r=rawRows[i];
+    const qDisplay=(r[iQuery]||'').trim();
+    if(!qDisplay)continue;
+    const qKey=qDisplay.toLowerCase();
+
+    const score      =pn(r[iScore]);
+    const vol        =pn(r[iVol]);
+    const impShare   =pn(r[iImpShare]);
+    const tPurch     =pn(r[iPurchTotal]);
+    const purchRate  =pn(r[iPurchRate]);
+    const bPurch     =pn(r[iPurchBrand]);
+    const bPurchShare=pn(r[iPurchShare]);
+
+    // SQP shares come as decimals (0.19 = 19%) — normalise to percentage
+    const norm=v=>v>1?v:v*100;
+    const impShareN    =norm(impShare);
+    const purchRateN   =norm(purchRate);
+    const bPurchShareN =norm(bPurchShare);
+
+    tTPurch+=tPurch; tBPurch+=bPurch;
+    if(impShareN>0){tImpSum+=impShareN;tImpCnt++;}
+    if(bPurchShareN>0){tPSharSum+=bPurchShareN;tPSharCnt++;}
+
+    queries[qKey]={
+      query:qDisplay,
+      score,vol,
+      impShare:impShareN,
+      tPurch,purchRate:purchRateN,bPurch,bPurchShare:bPurchShareN
+    };
+  }
+
+  return{
+    queries,
+    totals:{
+      tPurch:tTPurch,bPurch:tBPurch,
+      avgBImpShare:  tImpCnt  ?tImpSum/tImpCnt   :null,
+      avgBPurchShare:tPSharCnt?tPSharSum/tPSharCnt:null,
+    }
+  };
+}
+
+function sJoin(cur,prior){
+  const allQ=new Set([...Object.keys(cur.queries),...Object.keys(prior.queries)]);
+  return Array.from(allQ).map(q=>({
+    query: cur.queries[q]?.query || prior.queries[q]?.query || q,
+    cur:   cur.queries[q]  ||null,
+    prior: prior.queries[q]||null
+  })).filter(q=>q.cur!=null);
+}
+
+function sRenderTable(){
+  const filterTxt=(document.getElementById('s-search')?.value||'').toLowerCase().trim();
+  updateSortIcons('s-si-',sSort,sSortDir,['vol','score','bimpshare','bpurch','bpurchshare']);
+  const dir=sSortDir==='desc'?-1:1;
+  const val=q=>{
+    const c=q.cur||{};
+    if(sSort==='vol')         return c.vol||0;
+    if(sSort==='score')       return c.score||0;
+    if(sSort==='bimpshare')   return c.impShare||0;
+    if(sSort==='bpurch')      return c.bPurch||0;
+    return c.bPurchShare||0;
+  };
+  let rows=[...sQueries].sort((a,b)=>(val(b)-val(a))*dir);
+  if(filterTxt) rows=rows.filter(q=>q.query.toLowerCase().includes(filterTxt));
+
+  const fSh=v=>v.toFixed(1)+'%';
+  const fPP=v=>(v>=0?'+':'')+v.toFixed(1)+' pp';
+
+  document.getElementById('s-body').innerHTML=rows.map(q=>{
+    const c=q.cur, pr=q.prior;
+    const volD    = pd(c?.vol,          pr?.vol);
+    const impSD   = c?.impShare  !=null && pr?.impShare  !=null ? c.impShare   - pr.impShare   : null;
+    const bPurchD = pd(c?.bPurch,       pr?.bPurch);
+    const bPSharD = c?.bPurchShare!=null && pr?.bPurchShare!=null ? c.bPurchShare - pr.bPurchShare : null;
+
+    const shareDrop = bPSharD!==null && bPSharD < -3;
+    const shareGain = bPSharD!==null && bPSharD > 3;
+    const rowStyle  = shareDrop ? 'background:rgba(220,38,38,.04)' : shareGain ? 'background:rgba(22,163,74,.04)' : '';
+
+    // Score: show rank change if prior exists
+    const scoreCell = c?.score!=null
+      ? `<span style="font-family:var(--m)">${fI(c.score)}</span>${pr?.score!=null ? ` <span style="font-size:10px;color:var(--t2)">(${pr.score>c.score?'↑':'↓'}${Math.abs(c.score-pr.score)})</span>` : ''}`
+      : '—';
+
+    return`<tr style="${rowStyle}">
+      <td class="td-campaign"><div class="cname">${c?.query||q.query}</div></td>
+      <td class="num">${scoreCell}</td>
+      <td class="num">${c ? fI(c.vol) : '—'}</td>
+      <td class="num">${pill(volD,fPct,0)}</td>
+      <td class="num">${c?.impShare!=null ? fSh(c.impShare) : '—'}</td>
+      <td class="num">${impSD!==null ? pill(impSD,fPP,1) : '<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${c ? fI(c.bPurch) : '—'}</td>
+      <td class="num">${bPurchD!==null ? pill(bPurchD,fPct,1) : '<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${c?.bPurchShare!=null ? fSh(c.bPurchShare) : '—'}</td>
+      <td class="num">${bPSharD!==null ? pill(bPSharD,fPP,1) : '<span class="delta-pill pill-neu">—</span>'}</td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--t2)">No queries match.</td></tr>';
+
+  const lbl=sSort==='vol'?'volume':sSort==='bimpshare'?'impression share':sSort==='bpurch'?'brand purchases':'purchase share';
+  document.getElementById('s-tbl-note').textContent=`${rows.length} of ${sQueries.length} queries · sorted by ${lbl}${filterTxt?' · filtered':''}`;
+}
+
+function sSetSort(k){
+  if(sSort===k){sSortDir=sSortDir==='desc'?'asc':'desc';}else{sSort=k;sSortDir='desc';}
+  sRenderTable();
+}
+
+function sLoad(week,file){
+  if(!file)return;
+  // Parse without header — we handle the 2-row header manually
+  Papa.parse(file,{header:false,skipEmptyLines:true,
+    complete(res){
+      const extracted=sExtract(res.data);
+      sP[week]={...extracted,filename:file.name};
+      document.getElementById('s-lbl-'+week).textContent=file.name;
+      document.getElementById('s-dz-'+week).classList.add('ok');
+      if(sP.cur&&sP.prior)sRenderResults();
+    },error(){alert('Could not parse file.');}
+  });
+}
+
+function sRenderResults(){
+  const{cur,prior}=sP;
+  sQueries=sJoin(cur,prior);
+  document.getElementById('s-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${sQueries.length} queries`;
+  sRenderTable();
+  initResize('s-resize-handle','s-th-name','s-camp-tbl','--sname-w',220);
+  document.getElementById('s-upload-view').style.display='none';
+  document.getElementById('s-results-view').style.display='';
+}
+
+function sReset(){
+  sP.cur=sP.prior=null;sQueries=[];
+  ['cur','prior'].forEach(w=>{document.getElementById('s-dz-'+w).classList.remove('ok');document.getElementById('s-lbl-'+w).textContent=w==='cur'?'Current week':'Prior week';document.getElementById('s-f-'+w).value='';});
+  document.getElementById('s-results-view').style.display='none';
+  document.getElementById('s-upload-view').style.display='';
+  const si=document.getElementById('s-search');if(si)si.value='';
 }
 </script>
 </body>
