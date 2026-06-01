@@ -765,8 +765,8 @@ function cRenderResults(){
   const{cur,prior}=cP;
   cCamps=cJoin(cur,prior);cPfsNB=buildNBPfs(cCamps.filter(c=>c.seg==='nb'));cPfB=buildBPf(cCamps.filter(c=>c.seg==='b'));cPfsOther=buildNBPfs(cCamps.filter(c=>c.seg===null));
   const brand=cur.brand||prior.brand||'PLTFRM';
-  document.getElementById('c-brand-display').textContent=brand;
-  document.getElementById('app-title').textContent=brand;
+  document.getElementById('c-brand-display').textContent='PLTFRM';
+  document.getElementById('app-title').textContent='PLTFRM';
   document.getElementById('c-results-sub').textContent=`${cur.filename} vs. ${prior.filename} · ${cCamps.length} active campaigns`;
   rChange('c-rev-pct','c-rev-abs',cur.rv,prior.rv,f$,1);rChange('c-spend-pct','c-spend-abs',cur.sp,prior.sp,f$,0);
   rCard('c-all-roas-cur','c-all-roas-prior',cur.all.roas,prior.all.roas,fR,1);rCard('c-b-roas-cur','c-b-roas-prior',cur.b.roas,prior.b.roas,fR,1);rCard('c-nb-roas-cur','c-nb-roas-prior',cur.nb.roas,prior.nb.roas,fR,1);
