@@ -120,9 +120,9 @@
     .stab.on { background: var(--t1); color: #fff; border-color: transparent; }
 
     /* ── Tables ── */
-    .camp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+    .camp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
     .camp-tbl th {
-      padding: 8px 10px; border-bottom: 1px solid var(--b1); color: var(--t3);
+      padding: 9px 16px; border-bottom: 1px solid var(--b1); color: var(--t3);
       font-weight: 500; font-size: 9px; text-transform: uppercase; letter-spacing: .06em;
       text-align: left; white-space: nowrap; position: relative; user-select: none;
       background: var(--s2); font-family: var(--mono);
@@ -130,7 +130,7 @@
     .camp-tbl th.sortable { cursor: pointer; }
     .camp-tbl th.sortable:hover { color: var(--t1); }
     .camp-tbl th.num { text-align: right; }
-    .camp-tbl td { padding: 8px 10px; border-bottom: 1px solid var(--b1); vertical-align: middle; color: var(--t1); overflow: hidden; }
+    .camp-tbl td { padding: 10px 16px; border-bottom: 1px solid var(--b1); vertical-align: middle; color: var(--t1); overflow: hidden; }
     .camp-tbl td.num { text-align: right; font-family: var(--mono); font-size: 11px; }
     .camp-tbl tr:last-child td { border-bottom: none; }
     .camp-tbl tr:hover td { background: var(--s2); }
@@ -149,6 +149,19 @@
       width: 2px; border-radius: 2px; background: var(--b2); transition: background .1s;
     }
     .resize-handle:hover::after { background: var(--t2); }
+
+    /* ── Top scroll bar ── */
+    .scroll-mirror {
+      overflow-x: auto; overflow-y: hidden;
+      height: 10px; border-radius: 10px 10px 0 0;
+      border: 1px solid var(--b1); border-bottom: none;
+      background: var(--s2);
+    }
+    .scroll-mirror::-webkit-scrollbar { height: 6px; }
+    .scroll-mirror::-webkit-scrollbar-track { background: transparent; }
+    .scroll-mirror::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 3px; }
+    .scroll-mirror-inner { height: 1px; }
+    .tbl-wrap { border-radius: 0 0 10px 10px; }
 
     /* ── Delta pills ── */
     .delta-pill { display: inline-block; font-size: 10px; font-family: var(--mono); padding: 2px 7px; border-radius: 4px; font-weight: 500; }
@@ -272,15 +285,37 @@
           <div class="metric-card"><div class="mc-lbl">Orders</div><div class="mc-val" id="c-orders-cur">—</div><div class="mc-prior" id="c-orders-prior"></div></div>
         </div>
         <div class="slbl">CPCs</div>
-        <div class="g2">
+        <div class="g2" style="margin-bottom:12px">
           <div class="metric-card"><div class="mc-lbl">Branded CPC <span class="seg-badge badge-b">| b |</span></div><div class="mc-val" id="c-b-cpc-cur">—</div><div class="mc-prior" id="c-b-cpc-prior"></div></div>
           <div class="metric-card"><div class="mc-lbl">NB CPC <span class="seg-badge badge-nb">| nb |</span></div><div class="mc-val" id="c-nb-cpc-cur">—</div><div class="mc-prior" id="c-nb-cpc-prior"></div></div>
+        </div>
+        <div class="slbl">Spend allocation</div>
+        <div class="g3">
+          <div class="metric-card">
+            <div class="mc-lbl">Branded spend <span class="seg-badge badge-b">| b |</span></div>
+            <div class="mc-val" id="c-b-spend-cur">—</div>
+            <div class="mc-prior" id="c-b-spend-prior"></div>
+            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-b-spend-pct">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-lbl">NB spend <span class="seg-badge badge-nb">| nb |</span></div>
+            <div class="mc-val" id="c-nb-spend-cur">—</div>
+            <div class="mc-prior" id="c-nb-spend-prior"></div>
+            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-nb-spend-pct">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-lbl">Auto spend</div>
+            <div class="mc-val" id="c-auto-spend-cur">—</div>
+            <div class="mc-prior" id="c-auto-spend-prior"></div>
+            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-auto-spend-pct">—</div>
+          </div>
         </div>
       </div>
 
       <!-- CAMPAIGNS TABLE -->
       <div id="c-campaign-view" style="display:none">
-        <div class="tbl-wrap">
+        <div class="scroll-mirror" id="c-scroll-mirror"><div class="scroll-mirror-inner"></div></div>
+        <div class="tbl-wrap" id="c-tbl-wrap">
           <table class="camp-tbl" id="c-camp-tbl">
             <thead><tr>
               <th class="th-campaign" id="c-th-name">
@@ -290,14 +325,18 @@
               <th style="width:44px">
                 <span class="seg-toggle st-all" id="c-seg-toggle" onclick="cCycleSeg()"><span id="c-seg-label">Seg</span> <span style="opacity:.5">⇅</span></span>
               </th>
-              <th class="num sortable" onclick="cSetSort('rev')">Revenue <span class="sort-icon" id="c-si-rev">↕</span></th>
-              <th class="num" style="width:52px">Rev Δ</th>
-              <th class="num sortable" onclick="cSetSort('spend')">Spend <span class="sort-icon" id="c-si-spend">↕</span></th>
-              <th class="num" style="width:52px">Spend Δ</th>
+              <th class="num" style="width:72px;color:var(--t3)">Rev Prior</th>
+              <th class="num sortable" onclick="cSetSort('rev')">Rev Current <span class="sort-icon" id="c-si-rev">↕</span></th>
+              <th class="num sortable" onclick="cSetSort('revpct')">Rev Δ% <span class="sort-icon" id="c-si-revpct">↕</span></th>
+              <th class="num" style="width:72px;color:var(--t3)">Spend Prior</th>
+              <th class="num sortable" onclick="cSetSort('spend')">Spend Current <span class="sort-icon" id="c-si-spend">↕</span></th>
+              <th class="num sortable" onclick="cSetSort('spendpct')">Spend Δ% <span class="sort-icon" id="c-si-spendpct">↕</span></th>
+              <th class="num" style="width:56px;color:var(--t3)">ROAS Prior</th>
               <th class="num sortable" onclick="cSetSort('roas')">ROAS <span class="sort-icon" id="c-si-roas">↕</span></th>
-              <th class="num" style="width:52px">ROAS Δ</th>
+              <th class="num sortable" onclick="cSetSort('roaspct')">ROAS Δ <span class="sort-icon" id="c-si-roaspct">↕</span></th>
+              <th class="num" style="width:56px;color:var(--t3)">CVR Prior</th>
               <th class="num sortable" onclick="cSetSort('cvr')">CVR <span class="sort-icon" id="c-si-cvr">↕</span></th>
-              <th class="num" style="width:52px">CVR Δ</th>
+              <th class="num sortable" onclick="cSetSort('cvrpct')">CVR Δ <span class="sort-icon" id="c-si-cvrpct">↕</span></th>
             </tr></thead>
             <tbody id="c-camp-body"></tbody>
           </table>
@@ -371,23 +410,29 @@
         <div class="metric-card"><div class="mc-lbl">CVR</div><div class="mc-val" id="a-cvr-cur">—</div><div class="mc-prior" id="a-cvr-prior"></div></div>
       </div>
 
-      <div class="tbl-wrap">
+      <div class="scroll-mirror" id="a-scroll-mirror"><div class="scroll-mirror-inner"></div></div>
+      <div class="tbl-wrap" id="a-tbl-wrap">
         <table class="camp-tbl" id="a-camp-tbl">
           <thead><tr>
             <th class="th-campaign" id="a-th-name">
               Product
               <div class="resize-handle" id="a-resize-handle"></div>
             </th>
-            <th class="num sortable" onclick="aSetSort('rev')">Revenue <span class="sort-icon" id="a-si-rev">↕</span></th>
-            <th class="num" style="width:52px">Rev Δ</th>
-            <th class="num sortable" onclick="aSetSort('spend')">Spend <span class="sort-icon" id="a-si-spend">↕</span></th>
-            <th class="num" style="width:52px">Spend Δ</th>
+            <th class="num" style="width:72px;color:var(--t3)">Rev Prior</th>
+            <th class="num sortable" onclick="aSetSort('rev')">Rev Current <span class="sort-icon" id="a-si-rev">↕</span></th>
+            <th class="num sortable" onclick="aSetSort('revpct')">Rev Δ% <span class="sort-icon" id="a-si-revpct">↕</span></th>
+            <th class="num" style="width:72px;color:var(--t3)">Spend Prior</th>
+            <th class="num sortable" onclick="aSetSort('spend')">Spend Current <span class="sort-icon" id="a-si-spend">↕</span></th>
+            <th class="num sortable" onclick="aSetSort('spendpct')">Spend Δ% <span class="sort-icon" id="a-si-spendpct">↕</span></th>
+            <th class="num" style="width:52px;color:var(--t3)">ROAS Prior</th>
             <th class="num sortable" onclick="aSetSort('roas')">ROAS <span class="sort-icon" id="a-si-roas">↕</span></th>
-            <th class="num" style="width:52px">ROAS Δ</th>
+            <th class="num sortable" onclick="aSetSort('roaspct')">ROAS Δ <span class="sort-icon" id="a-si-roaspct">↕</span></th>
+            <th class="num" style="width:52px;color:var(--t3)">Orders Prior</th>
             <th class="num sortable" onclick="aSetSort('orders')">Orders <span class="sort-icon" id="a-si-orders">↕</span></th>
-            <th class="num" style="width:52px">Orders Δ</th>
+            <th class="num sortable" onclick="aSetSort('orderspct')">Orders Δ% <span class="sort-icon" id="a-si-orderspct">↕</span></th>
+            <th class="num" style="width:52px;color:var(--t3)">CVR Prior</th>
             <th class="num sortable" onclick="aSetSort('cvr')">CVR <span class="sort-icon" id="a-si-cvr">↕</span></th>
-            <th class="num" style="width:52px">CVR Δ</th>
+            <th class="num sortable" onclick="aSetSort('cvrpct')">CVR Δ <span class="sort-icon" id="a-si-cvrpct">↕</span></th>
           </tr></thead>
           <tbody id="a-body"></tbody>
         </table>
@@ -614,18 +659,23 @@ function applyColWidth(handleId) {
 }
 
 /* ─── Sort indicator helper ────────────────────── */
-function updateSortIcons(prefix, sortKey, sortDir, keys) {
-  keys.forEach(k => {
-    const el = document.getElementById(prefix+k);
-    if (!el) return;
-    if (k === sortKey) {
-      el.textContent = sortDir === 'asc' ? '↑' : '↓';
-      el.classList.add('active');
-    } else {
-      el.textContent = '↕';
-      el.classList.remove('active');
-    }
+function updateSortIcons(prefix, sortKey, sortDir, keys){
+  keys.forEach(k=>{
+    const el=document.getElementById(prefix+k);
+    if(!el)return;
+    if(k===sortKey){el.textContent=sortDir==='asc'?'↑':'↓';el.classList.add('active');}
+    else{el.textContent='↕';el.classList.remove('active');}
   });
+}
+function initScrollMirror(mirrorId, wrapId){
+  const mirror=document.getElementById(mirrorId);
+  const wrap=document.getElementById(wrapId);
+  if(!mirror||!wrap)return;
+  // Set inner width to match scroll width
+  const sync=()=>{ mirror.firstElementChild.style.width=wrap.scrollWidth+'px'; };
+  sync(); setTimeout(sync,100);
+  mirror.addEventListener('scroll',()=>{ if(wrap.scrollLeft!==mirror.scrollLeft) wrap.scrollLeft=mirror.scrollLeft; },{passive:true});
+  wrap.addEventListener('scroll',()=>{ if(mirror.scrollLeft!==wrap.scrollLeft) mirror.scrollLeft=wrap.scrollLeft; },{passive:true});
 }
 
 /* ─── Campaign section ─────────────────────────── */
@@ -647,13 +697,15 @@ function cExtract(res){
   const cc=findCol(h,['clicks'],[]);
   const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
   const ic=findCol(h,['impressions'],[]);
+  const isAuto=n=>(n||'').toLowerCase().includes('| auto |')||/\|\s*auto\s*\|/i.test(n||'');
   const brand=detectBrand(rows,nc);
   const seg={all:{cl:0,or:0,sp:0,rv:0},b:{cl:0,or:0,sp:0,rv:0},nb:{cl:0,or:0,sp:0,rv:0}};
-  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0;const by={};
+  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0,autoSp=0;const by={};
   for(const row of rows){
     const name=nc?(row[nc]||'').trim():'';if(!name)continue;
     const cl=pn(row[cc]),or=pn(row[oc]),sp=pn(row[sc]),rv=pn(row[rc]),im=pn(row[ic]);
     tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;tIm+=im;
+    if(isAuto(name))autoSp+=sp;
     seg.all.cl+=cl;seg.all.or+=or;seg.all.sp+=sp;seg.all.rv+=rv;
     if(isB(name)){seg.b.cl+=cl;seg.b.or+=or;seg.b.sp+=sp;seg.b.rv+=rv;}
     if(isNB(name)){seg.nb.cl+=cl;seg.nb.or+=or;seg.nb.sp+=sp;seg.nb.rv+=rv;}
@@ -663,7 +715,7 @@ function cExtract(res){
   for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.roas=c.sp>0?c.rv/c.sp:null;c.pf=getPf(c.name);}
   const roas=s=>s.sp>0?s.rv/s.sp:null,cvr=s=>s.cl>0?(s.or/s.cl)*100:null,cpc=s=>s.cl>0?s.sp/s.cl:null;
   const ns=rows.map(r=>nc?(r[nc]||''):'');
-  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,sc,rc,cc,oc,ic,brand,
+  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,autoSp,sc,rc,cc,oc,ic,brand,
     all:{...seg.all,roas:roas(seg.all),cvr:cvr(seg.all)},
     b:{...seg.b,roas:roas(seg.b),cvr:cvr(seg.b),cpc:cpc(seg.b),cnt:ns.filter(isB).length},
     nb:{...seg.nb,roas:roas(seg.nb),cvr:cvr(seg.nb),cpc:cpc(seg.nb),cnt:ns.filter(isNB).length},by};
@@ -691,23 +743,39 @@ function cRenderTable(){
   if(cSeg==='b')camps=camps.filter(c=>c.seg==='b');
   if(cSeg==='nb')camps=camps.filter(c=>c.seg==='nb');
   const dir=cSortDir==='desc'?-1:1;
-  const val=c=>cSort==='rev'?(c.cur?.rv||0):cSort==='spend'?(c.cur?.sp||0):cSort==='roas'?(c.cur?.roas||0):(c.cur?.cvr||0);
+  const val=c=>{
+    if(cSort==='rev')   return c.cur?.rv||0;
+    if(cSort==='revpct')  return pd(c.cur?.rv,c.prior?.rv)??-Infinity;
+    if(cSort==='spend') return c.cur?.sp||0;
+    if(cSort==='spendpct')return pd(c.cur?.sp,c.prior?.sp)??-Infinity;
+    if(cSort==='roas')  return c.cur?.roas||0;
+    if(cSort==='roaspct') return roasD(c.cur,c.prior)??-Infinity;
+    if(cSort==='cvr')   return c.cur?.cvr||0;
+    if(cSort==='cvrpct')  return cvrD(c.cur,c.prior)??-Infinity;
+    return 0;
+  };
   camps.sort((a,b)=>(val(b)-val(a))*dir);
-  updateSortIcons('c-si-',cSort,cSortDir,['rev','spend','roas','cvr']);
+  updateSortIcons('c-si-',cSort,cSortDir,['rev','revpct','spend','spendpct','roas','roaspct','cvr','cvrpct']);
+  const priCell=(v,fn)=>v!=null?`<span style="font-family:var(--mono);font-size:10px;color:var(--t3)">${fn(v)}</span>`:'<span style="color:var(--t3)">—</span>';
   document.getElementById('c-camp-body').innerHTML=camps.map(c=>{
     const cur=c.cur,pr=c.prior,rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp),roD=roasD(cur,pr),cvD=cvrD(cur,pr);
     const sb=c.seg?`<span class="seg-badge badge-${c.seg}">${c.seg==='b'?'B':'NB'}</span>`:'<span style="color:var(--t2);font-size:10px">—</span>';
     return`<tr>
       <td class="td-campaign"><span class="cname">${c.name}</span></td>
       <td>${sb}</td>
+      <td class="num">${priCell(pr?.rv,f$)}</td>
       <td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td>
+      <td class="num">${priCell(pr?.sp,f$)}</td>
       <td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td>
+      <td class="num">${priCell(pr?.roas,fR)}</td>
       <td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${priCell(pr?.cvr,fP)}</td>
       <td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="10" style="text-align:center;padding:1.5rem;color:var(--t2)">No campaigns match.</td></tr>';
-  const lbl=cSort==='rev'?'revenue':cSort==='spend'?'spend':cSort==='roas'?'ROAS':'CVR';
+  }).join('')||'<tr><td colspan="14" style="text-align:center;padding:1.5rem;color:var(--t2)">No campaigns match.</td></tr>';
+  const lbl=cSort.replace('%',' %').replace('rev','revenue').replace('spend','spend').replace('roas','ROAS').replace('cvr','CVR');
   document.getElementById('c-tbl-note').textContent=`${camps.length} active campaigns · ${cSeg==='b'?'branded':cSeg==='nb'?'non-branded':'all'} · sorted by ${lbl}`;
+  initScrollMirror('c-scroll-mirror','c-tbl-wrap');
 }
 function cSetSort(k){if(cSort===k){cSortDir=cSortDir==='desc'?'asc':'desc';}else{cSort=k;cSortDir='desc';}cRenderTable();}
 
@@ -774,7 +842,16 @@ function cRenderResults(){
   const ci=(!cur.ic||cur.im===0)?null:cur.im,pi=(!prior.ic||prior.im===0)?null:prior.im;
   rCard('c-impr-cur','c-impr-prior',ci,pi,fI,1);rCard('c-clicks-cur','c-clicks-prior',cur.cl,prior.cl,fI,1);rCard('c-orders-cur','c-orders-prior',cur.or,prior.or,fI,1);
   rCard('c-b-cpc-cur','c-b-cpc-prior',cur.b.cpc,prior.b.cpc,f$,-1);rCard('c-nb-cpc-cur','c-nb-cpc-prior',cur.nb.cpc,prior.nb.cpc,f$,-1);
+  // Spend allocation
+  rCard('c-b-spend-cur', 'c-b-spend-prior',  cur.b.sp,   prior.b.sp,   f$,0);
+  rCard('c-nb-spend-cur','c-nb-spend-prior',  cur.nb.sp,  prior.nb.sp,  f$,0);
+  rCard('c-auto-spend-cur','c-auto-spend-prior',cur.autoSp,prior.autoSp,f$,0);
+  const spPct=(sp,total)=>total>0?(sp/total*100).toFixed(1)+'% of spend':'—';
+  document.getElementById('c-b-spend-pct').textContent   =spPct(cur.b.sp,  cur.sp);
+  document.getElementById('c-nb-spend-pct').textContent  =spPct(cur.nb.sp, cur.sp);
+  document.getElementById('c-auto-spend-pct').textContent=spPct(cur.autoSp,cur.sp);
   cRenderTable();cRenderPfs();
+  initScrollMirror('c-scroll-mirror','c-tbl-wrap');
   // Init resize handle after table is in DOM
   initResize('c-resize-handle','c-th-name','c-camp-tbl','--cname-w',220);
   const w=[];if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected.`});if(!cur.oc)w.push({t:'err',m:`Orders column not detected.`});if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0.`});if(cur.b.cnt===0)w.push({t:'warn',m:`No "| b |" campaigns found.`});if(cur.nb.cnt===0)w.push({t:'warn',m:`No "| nb |" campaigns found.`});
@@ -822,10 +899,23 @@ function aJoin(cur,pr){
     .filter(a=>a.cur&&(a.cur.sp>0||a.cur.cl>0));
 }
 function aRenderTable(){
-  updateSortIcons('a-si-',aSort,aSortDir,['rev','spend','roas','orders','cvr']);
+  updateSortIcons('a-si-',aSort,aSortDir,['rev','revpct','spend','spendpct','roas','roaspct','orders','orderspct','cvr','cvrpct']);
   const dir=aSortDir==='desc'?-1:1;
-  const val=a=>aSort==='rev'?(a.cur?.rv||0):aSort==='spend'?(a.cur?.sp||0):aSort==='roas'?(a.cur?.roas||0):aSort==='orders'?(a.cur?.or||0):(a.cur?.cvr||0);
+  const val=a=>{
+    if(aSort==='rev')     return a.cur?.rv||0;
+    if(aSort==='revpct')    return pd(a.cur?.rv,a.prior?.rv)??-Infinity;
+    if(aSort==='spend')   return a.cur?.sp||0;
+    if(aSort==='spendpct')  return pd(a.cur?.sp,a.prior?.sp)??-Infinity;
+    if(aSort==='roas')    return a.cur?.roas||0;
+    if(aSort==='roaspct')   return (a.cur?.roas!=null&&a.prior?.roas!=null?a.cur.roas-a.prior.roas:null)??-Infinity;
+    if(aSort==='orders')  return a.cur?.or||0;
+    if(aSort==='orderspct') return pd(a.cur?.or,a.prior?.or)??-Infinity;
+    if(aSort==='cvr')     return a.cur?.cvr||0;
+    if(aSort==='cvrpct')    return (a.cur?.cvr!=null&&a.prior?.cvr!=null?a.cur.cvr-a.prior.cvr:null)??-Infinity;
+    return 0;
+  };
   const sorted=[...aAsins].sort((a,b)=>(val(b)-val(a))*dir);
+  const priCell=(v,fn)=>v!=null?`<span style="font-family:var(--mono);font-size:10px;color:var(--t3)">${fn(v)}</span>`:'<span style="color:var(--t3)">—</span>';
   document.getElementById('a-body').innerHTML=sorted.map(a=>{
     const cur=a.cur,pr=a.prior;
     const rD=pd(cur?.rv,pr?.rv),sD=pd(cur?.sp,pr?.sp);
@@ -834,18 +924,24 @@ function aRenderTable(){
     const cvD=cur?.cvr!=null&&pr?.cvr!=null?cur.cvr-pr.cvr:null;
     return`<tr>
       <td class="td-campaign">
-        <div style="font-family:var(--m);font-size:11px;font-weight:500">${a.asin}</div>
-        ${a.sku?`<div style="font-size:10px;color:var(--t2)">${a.sku}</div>`:''}
+        <div style="font-family:var(--mono);font-size:11px;font-weight:500">${a.asin}</div>
+        ${a.sku?`<div style="font-size:10px;color:var(--t3)">${a.sku}</div>`:''}
       </td>
+      <td class="num">${priCell(pr?.rv,f$)}</td>
       <td class="num">${cur?f$(cur.rv):'—'}</td><td class="num">${pill(rD,fPct,1)}</td>
+      <td class="num">${priCell(pr?.sp,f$)}</td>
       <td class="num">${cur?f$(cur.sp):'—'}</td><td class="num">${pill(sD,fPct,0)}</td>
+      <td class="num">${priCell(pr?.roas,fR)}</td>
       <td class="num">${cur?.roas!=null?fR(cur.roas):'—'}</td><td class="num">${roD!==null?pill(roD,fRd,1):'<span class="delta-pill pill-neu">—</span>'}</td>
+      <td class="num">${priCell(pr?.or,fI)}</td>
       <td class="num">${cur?fI(cur.or):'—'}</td><td class="num">${pill(orD,fPct,1)}</td>
+      <td class="num">${priCell(pr?.cvr,fP)}</td>
       <td class="num">${cur?.cvr!=null?fP(cur.cvr):'—'}</td><td class="num">${cvD!==null?pill(cvD,fPp,1):'<span class="delta-pill pill-neu">—</span>'}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--t2)">No active products found.</td></tr>';
-  const lbl=aSort==='rev'?'revenue':aSort==='spend'?'spend':aSort==='roas'?'ROAS':aSort==='orders'?'orders':'CVR';
+  }).join('')||'<tr><td colspan="16" style="text-align:center;padding:1.5rem;color:var(--t2)">No active products found.</td></tr>';
+  const lbl=aSort.replace('%',' Δ%');
   document.getElementById('a-tbl-note').textContent=`${sorted.length} active products · sorted by ${lbl}`;
+  initScrollMirror('a-scroll-mirror','a-tbl-wrap');
 }
 function aSetSort(k){if(aSort===k){aSortDir=aSortDir==='desc'?'asc':'desc';}else{aSort=k;aSortDir='desc';}aRenderTable();}
 function aLoad(week,file){
@@ -866,6 +962,7 @@ function aRenderResults(){
   rCard('a-clicks-cur','a-clicks-prior',cur.cl,   prior.cl,   fI,1);
   rCard('a-cvr-cur',   'a-cvr-prior',   cur.cvr,  prior.cvr,  fP,1);
   aRenderTable();
+  initScrollMirror('a-scroll-mirror','a-tbl-wrap');
   initResize('a-resize-handle','a-th-name','a-camp-tbl','--cname-w',160);
   const hint=document.getElementById('a-hint');hint.style.display='';
   hint.innerHTML=`Detected — Product: <b>${cur.productCol||'NOT FOUND'}</b> · Revenue: <b>${cur.rc||'NOT FOUND'}</b> · Spend: <b>${cur.sc||'NOT FOUND'}</b> · Orders: <b>${cur.oc||'NOT FOUND'}</b>`;
