@@ -6,217 +6,198 @@
   <title>PLTFRM WoW Comparator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://rickygrossman5-wq.github.io/cac-analyzer/styles.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── Local variable fallbacks (overridden by external sheet) ── */
     :root {
-      --bg: #f9f9f8;
-      --s1: #ffffff;
-      --s2: #f2f1ef;
-      --s3: #eceae7;
-      --b1: rgba(0,0,0,0.10);
-      --b2: rgba(0,0,0,0.16);
-      --b3: rgba(0,0,0,0.22);
-      --t1: #1a1a18;
-      --t2: #5c5c58;
-      --t3: #9a9a94;
-      --ok: #1a8055;
-      --err: #d94040;
-      --mono: 'DM Mono', monospace;
-      --sans: 'DM Sans', sans-serif;
-      /* Legacy aliases used in JS-generated HTML */
+      --black:     #0c0c0a;
+      --ink:       #161614;
+      --card:      #1e1e1c;
+      --card-2:    #252523;
+      --line:      rgba(255,255,255,.13);
+      --line-soft: rgba(255,255,255,.06);
+      --white:     #f0f0eb;
+      --gray:      #9a9a92;
+      --gray-dim:  #5e5e58;
+      --green:     #3ecf74;
+      --red:       #f05252;
+      --sans:      'Archivo', system-ui, sans-serif;
+      --mono:      'DM Mono', Menlo, monospace;
+      /* Legacy aliases used throughout JS-generated HTML */
+      --t1: var(--white); --t2: var(--gray); --t3: var(--gray-dim);
+      --s: var(--green);  --d: var(--red);
       --m: var(--mono);
-      --br: var(--b1);
-      --s: var(--ok);
-      --d: var(--err);
-      --bg1: var(--s1);
-      --bg2: var(--s2);
-      --r-md: 8px;
-      --r-lg: 10px;
     }
-    body { font-family: var(--sans); background: var(--bg); color: var(--t1); min-height: 100vh; padding: 2rem 1.5rem; font-size: 14px; }
-    .container { max-width: 1020px; margin: 0 auto; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: var(--sans); background: var(--black); color: var(--white); min-height: 100vh; padding: 2rem 1.5rem; font-size: 14px; -webkit-font-smoothing: antialiased; }
+    .grain { position: fixed; inset: 0; pointer-events: none; z-index: 999; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); background-repeat: repeat; background-size: 128px; opacity: .5; }
+    .container { max-width: 1060px; margin: 0 auto; position: relative; z-index: 1; }
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .g3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
 
-    /* ── Drop zones ── */
-    .dz {
-      border: 1.5px dashed var(--b2); border-radius: 10px; padding: 2rem 1.5rem;
-      text-align: center; cursor: pointer; background: var(--s2);
-      user-select: none; transition: border-color .12s, background .12s;
-    }
-    .dz:hover { background: var(--s3); border-color: var(--b3); }
-    .dz.ok { border-style: solid; border-color: var(--ok); background: #f0faf5; }
+    /* Drop zones */
+    .dz { border: 1px dashed var(--line); border-radius: 10px; padding: 2rem 1.5rem; text-align: center; cursor: pointer; background: var(--ink); user-select: none; transition: border-color .15s, background .15s; }
+    .dz:hover { background: var(--card); border-color: rgba(255,255,255,.28); }
+    .dz.ok { border-style: solid; border-color: var(--green); background: rgba(62,207,116,.07); }
 
-    /* ── Labels ── */
-    .slbl {
-      font-size: 10px; font-weight: 500; color: var(--t3);
-      text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px;
-      font-family: var(--mono);
-    }
+    /* Labels */
+    .slbl { font-family: var(--mono); font-size: 9px; font-weight: 500; color: var(--gray-dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
 
-    /* ── Revenue/spend summary card ── */
-    .chg-card {
-      background: var(--s1); border-radius: 10px; padding: 20px;
-      border: 1px solid var(--b1); box-shadow: 0 2px 12px rgba(0,0,0,.06);
-    }
-    .chg-lbl { font-size: 10px; font-weight: 500; color: var(--t3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 14px; font-family: var(--mono); }
-    .chg-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--b1); }
+    /* Revenue card */
+    .chg-card { background: var(--card); border-radius: 10px; padding: 20px; border: 1px solid var(--line); }
+    .chg-lbl { font-family: var(--mono); font-size: 9px; color: var(--gray-dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; }
+    .chg-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
     .chg-row:last-child { border: none; }
-    .chg-name { font-size: 13px; color: var(--t2); font-weight: 500; }
+    .chg-name { font-family: var(--sans); font-size: 13px; color: var(--gray); font-weight: 500; }
     .chg-right { text-align: right; }
-    .big { font-size: 20px; font-weight: 600; font-family: var(--mono); }
-    .small { font-size: 11px; font-family: var(--mono); margin-top: 3px; color: var(--t2); }
-    .pos { color: var(--ok); } .neg { color: var(--err); } .neu { color: var(--t3); }
+    .big { font-family: var(--mono); font-size: 22px; font-weight: 500; }
+    .small { font-family: var(--mono); font-size: 11px; margin-top: 3px; color: var(--gray); }
+    .pos { color: var(--green); } .neg { color: var(--red); } .neu { color: var(--gray-dim); }
 
-    /* ── Metric cards ── */
-    .metric-card {
-      background: var(--s1); border-radius: 10px; padding: 16px;
-      border: 1px solid var(--b1); box-shadow: 0 2px 12px rgba(0,0,0,.06);
-    }
-    .mc-lbl { font-size: 10px; font-weight: 500; color: var(--t3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; font-family: var(--mono); }
-    .mc-val { font-size: 26px; font-weight: 500; font-family: var(--mono); color: var(--t1); line-height: 1; }
-    .mc-prior { font-size: 11px; font-family: var(--mono); margin-top: 6px; }
+    /* Metric cards */
+    .metric-card { background: var(--card); border-radius: 10px; padding: 16px 18px; border: 1px solid var(--line); }
+    .mc-lbl { font-family: var(--mono); font-size: 9px; font-weight: 500; color: var(--gray-dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .mc-val { font-family: var(--mono); font-size: 26px; font-weight: 500; color: var(--white); line-height: 1; }
+    .mc-prior { font-family: var(--mono); font-size: 11px; margin-top: 7px; }
 
-    /* ── Seg badges ── */
-    .seg-badge { display: inline-block; font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 20px; font-family: var(--mono); }
-    .badge-b  { background: rgba(79,70,229,.1);  color: #4338ca; }
-    .badge-nb { background: rgba(219,39,119,.1); color: #be185d; }
-    .badge-all{ background: var(--s3); color: var(--t2); }
+    /* Badges */
+    .seg-badge { display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--gray); background: rgba(255,255,255,.04); }
+    .badge-b, .badge-nb { border-color: rgba(255,255,255,.2); color: var(--white); }
+    .badge-all { border-color: var(--line); color: var(--gray-dim); }
 
-    /* ── Navigation ── */
-    .top-nav {
-      display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap;
-      border-bottom: 1px solid var(--b1); padding-bottom: 14px;
-    }
-    .tnav {
-      font-size: 13px; font-weight: 500; padding: 6px 16px;
-      border: 1px solid var(--b2); border-radius: 20px;
-      background: var(--s1); cursor: pointer; color: var(--t2);
-      transition: background .1s, color .1s;
-    }
-    .tnav:hover { background: var(--s2); color: var(--t1); }
-    .tnav.on { background: var(--t1); color: #fff; border-color: transparent; }
+    /* Navigation */
+    .top-nav { display: flex; gap: 6px; margin-bottom: 28px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+    .tnav { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 6px 16px; border: 1px solid var(--line); border-radius: 20px; background: transparent; cursor: pointer; color: var(--gray); transition: color .12s, border-color .12s, background .12s; }
+    .tnav:hover { color: var(--white); border-color: rgba(255,255,255,.3); }
+    .tnav.on { background: var(--white); color: var(--black); border-color: var(--white); font-family: var(--sans); font-weight: 600; }
+    .view-toggle { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+    .vtab { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 5px 14px; border: 1px solid var(--line); border-radius: 20px; background: transparent; cursor: pointer; color: var(--gray); transition: color .12s, border-color .12s, background .12s; }
+    .vtab:hover { color: var(--white); border-color: rgba(255,255,255,.3); }
+    .vtab.on { background: var(--white); color: var(--black); border-color: var(--white); font-family: var(--sans); font-weight: 600; }
 
-    .view-toggle { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-    .vtab {
-      font-size: 12px; font-weight: 500; padding: 5px 14px;
-      border: 1px solid var(--b2); border-radius: 20px;
-      background: var(--s1); cursor: pointer; color: var(--t2);
-      transition: background .1s, color .1s;
-    }
-    .vtab:hover { background: var(--s2); color: var(--t1); }
-    .vtab.on { background: var(--t1); color: #fff; border-color: transparent; }
-
-    /* ── Sort / filter tabs ── */
+    /* Sort tabs */
     .tab-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-    .stab {
-      font-size: 11px; padding: 4px 12px;
-      border: 1px solid var(--b2); border-radius: 20px;
-      background: var(--s1); cursor: pointer; color: var(--t2);
-      transition: background .1s, color .1s;
-    }
-    .stab:hover { background: var(--s2); color: var(--t1); }
-    .stab.on { background: var(--t1); color: #fff; border-color: transparent; }
+    .stab { font-family: var(--sans); font-size: 11px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 20px; background: transparent; cursor: pointer; color: var(--gray); transition: color .12s, border-color .12s; }
+    .stab:hover { color: var(--white); border-color: rgba(255,255,255,.3); }
+    .stab.on { color: var(--white); border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.07); }
 
-    /* ── Tables ── */
+    /* Tables */
     .camp-tbl { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .camp-tbl th {
-      padding: 9px 16px; border-bottom: 1px solid var(--b1); color: var(--t3);
-      font-weight: 500; font-size: 9px; text-transform: uppercase; letter-spacing: .06em;
-      text-align: left; white-space: nowrap; position: relative; user-select: none;
-      background: var(--s2); font-family: var(--mono);
-    }
-    .camp-tbl th.sortable { cursor: pointer; }
-    .camp-tbl th.sortable:hover { color: var(--t1); }
-    .camp-tbl th.num { text-align: right; }
-    .camp-tbl td { padding: 10px 16px; border-bottom: 1px solid var(--b1); vertical-align: middle; color: var(--t1); overflow: hidden; }
+    .camp-tbl thead th { padding: 9px 16px; border-bottom: 1px solid var(--line); color: var(--gray-dim); font-family: var(--mono); font-weight: 500; font-size: 9px; text-transform: uppercase; letter-spacing: .09em; text-align: left; white-space: nowrap; position: sticky; top: 0; user-select: none; background: var(--ink); z-index: 2; }
+    .camp-tbl thead th.sortable { cursor: pointer; }
+    .camp-tbl thead th.sortable:hover { color: var(--white); }
+    .camp-tbl thead th.num { text-align: right; }
+    .camp-tbl tbody tr:nth-child(odd)  td { background: var(--black); }
+    .camp-tbl tbody tr:nth-child(even) td { background: var(--ink); }
+    .camp-tbl tbody tr:hover td { background: var(--card) !important; }
+    .camp-tbl td { padding: 10px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; color: var(--white); }
     .camp-tbl td.num { text-align: right; font-family: var(--mono); font-size: 11px; }
     .camp-tbl tr:last-child td { border-bottom: none; }
-    .camp-tbl tr:hover td { background: var(--s2); }
 
-    .sort-icon { font-size: 9px; margin-left: 3px; opacity: .35; }
-    .sort-icon.active { opacity: 1; color: var(--t1); }
+    /* Sticky first column */
+    .camp-tbl thead th:first-child,
+    .camp-tbl td:first-child { position: sticky; left: 0; z-index: 2; box-shadow: 1px 0 0 var(--line); }
+    .camp-tbl thead th:first-child { z-index: 3; background: var(--ink); }
+    .camp-tbl tbody tr:nth-child(odd)  td:first-child { background: var(--black); }
+    .camp-tbl tbody tr:nth-child(even) td:first-child { background: var(--ink); }
+    .camp-tbl tbody tr:hover td:first-child { background: var(--card) !important; }
 
-    /* Campaign name column — resizable */
-    .th-campaign { width: var(--cname-w, var(--bname-w, 220px)); min-width: 120px; position: relative; }
-    .td-campaign { vertical-align: middle; }
-    .cname { font-size: 11px; color: var(--t1); white-space: normal; word-break: break-word; display: block; }
+    /* Sort icons */
+    .sort-icon { font-size: 9px; margin-left: 3px; opacity: .3; }
+    .sort-icon.active { opacity: 1; color: var(--white); }
 
-    .resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: col-resize; z-index: 2; }
-    .resize-handle::after {
-      content: ''; position: absolute; right: 2px; top: 20%; bottom: 20%;
-      width: 2px; border-radius: 2px; background: var(--b2); transition: background .1s;
+    /* Resizable campaign column */
+    .th-campaign, .td-campaign {
+      width: var(--cname-w, var(--bname-w, 220px));
+      max-width: var(--cname-w, var(--bname-w, 220px));
+      min-width: 120px;
+      position: relative;
     }
-    .resize-handle:hover::after { background: var(--t2); }
+    .td-campaign { vertical-align: middle; overflow: hidden; }
+    .cname { font-size: 11px; color: var(--white); white-space: normal; word-break: break-word; overflow-wrap: anywhere; display: block; }
+    .resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: col-resize; z-index: 4; }
+    .resize-handle::after { content: ''; position: absolute; right: 2px; top: 20%; bottom: 20%; width: 2px; border-radius: 2px; background: var(--line); transition: background .1s; }
+    .resize-handle:hover::after { background: var(--gray); }
 
-    /* ── Top scroll bar ── */
-    .scroll-mirror {
-      overflow-x: auto; overflow-y: hidden;
-      height: 10px; border-radius: 10px 10px 0 0;
-      border: 1px solid var(--b1); border-bottom: none;
-      background: var(--s2);
-    }
+    /* Delta pills */
+    .delta-pill { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+    .pill-pos { background: rgba(62,207,116,.15); color: var(--green); }
+    .pill-neg { background: rgba(240,82,82,.15);  color: var(--red); }
+    .pill-neu { background: rgba(255,255,255,.06); color: var(--gray-dim); }
+
+    /* Table wrapper + scroll mirror */
+    .tbl-wrap { overflow-x: auto; border-radius: 0 0 10px 10px; border: 1px solid var(--line); border-top: none; background: var(--black); }
+    .tbl-note { font-family: var(--mono); font-size: 10px; color: var(--gray-dim); margin-top: 7px; text-align: right; }
+    .scroll-mirror { overflow-x: auto; overflow-y: hidden; height: 10px; border-radius: 10px 10px 0 0; border: 1px solid var(--line); border-bottom: none; background: var(--ink); }
     .scroll-mirror::-webkit-scrollbar { height: 6px; }
     .scroll-mirror::-webkit-scrollbar-track { background: transparent; }
-    .scroll-mirror::-webkit-scrollbar-thumb { background: var(--b3); border-radius: 3px; }
+    .scroll-mirror::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
     .scroll-mirror-inner { height: 1px; }
-    .tbl-wrap { border-radius: 0 0 10px 10px; }
 
-    /* ── Delta pills ── */
-    .delta-pill { display: inline-block; font-size: 10px; font-family: var(--mono); padding: 2px 7px; border-radius: 4px; font-weight: 500; }
-    .pill-pos { background: rgba(26,128,85,.1);  color: var(--ok); }
-    .pill-neg { background: rgba(217,64,64,.1);  color: var(--err); }
-    .pill-neu { background: var(--s3); color: var(--t3); }
+    /* Seg toggle */
+    .seg-toggle { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); font-family: var(--mono); font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; transition: all .1s; white-space: nowrap; color: var(--gray); background: transparent; }
+    .seg-toggle:hover, .seg-toggle.st-b, .seg-toggle.st-nb { color: var(--white); border-color: rgba(255,255,255,.4); background: rgba(255,255,255,.07); }
 
-    .tbl-wrap {
-      overflow-x: auto; border-radius: 10px;
-      border: 1px solid var(--b1); box-shadow: 0 2px 12px rgba(0,0,0,.06);
-      background: var(--s1);
-    }
-    .tbl-note { font-size: 10px; color: var(--t3); margin-top: 6px; text-align: right; font-family: var(--mono); }
-
-    /* ── Seg toggle ── */
-    .seg-toggle { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--b2); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; transition: all .1s; white-space: nowrap; font-family: var(--mono); }
-    .seg-toggle.st-all { background: var(--s2); color: var(--t2); }
-    .seg-toggle.st-b   { background: rgba(79,70,229,.1);  color: #4338ca; border-color: rgba(79,70,229,.25); }
-    .seg-toggle.st-nb  { background: rgba(219,39,119,.1); color: #be185d; border-color: rgba(219,39,119,.25); }
-
-    /* ── Portfolio blocks ── */
-    .pf-group { margin-bottom: 20px; }
-    .pf-group-lbl { font-size: 11px; font-weight: 600; color: var(--t1); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--b1); }
-    .pf-block { border: 1px solid var(--b1); border-radius: 10px; margin-bottom: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
-    .pf-block.is-b { border-left: 3px solid rgba(79,70,229,.4); }
-    .pf-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; background: var(--s2); user-select: none; gap: 8px; transition: background .1s; }
-    .pf-header:hover { background: var(--s3); }
+    /* Portfolio blocks */
+    .pf-group { margin-bottom: 22px; }
+    .pf-group-lbl { font-family: var(--mono); font-size: 9px; font-weight: 500; color: var(--gray-dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
+    .pf-block { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+    .pf-block.is-b { border-left: 2px solid rgba(255,255,255,.35); }
+    .pf-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; background: var(--ink); user-select: none; gap: 8px; transition: background .12s; }
+    .pf-header:hover { background: var(--card); }
     .pf-name-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .pf-name { font-size: 12px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pf-summary { display: flex; gap: 12px; font-size: 11px; font-family: var(--mono); color: var(--t2); align-items: center; flex-wrap: wrap; }
-    .pf-chevron { font-size: 10px; color: var(--t3); transition: transform .15s; flex-shrink: 0; }
+    .pf-name { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pf-summary { display: flex; gap: 14px; font-family: var(--mono); font-size: 11px; color: var(--gray); align-items: center; flex-wrap: wrap; }
+    .pf-chevron { font-size: 10px; color: var(--gray-dim); transition: transform .15s; flex-shrink: 0; }
     .pf-chevron.open { transform: rotate(180deg); }
-    .pf-body { display: none; padding: 12px 16px; background: var(--s1); }
+    .pf-body { display: none; padding: 14px 16px; background: var(--black); }
     .pf-body.open { display: block; }
     .pf-stats { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
-    .pf-stat { background: var(--bg); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--b1); }
-    .pf-stat-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--t3); margin-bottom: 4px; font-family: var(--mono); }
-    .pf-stat-val { font-size: 15px; font-weight: 500; font-family: var(--mono); color: var(--t1); }
-    .pf-stat-prior { font-size: 10px; font-family: var(--mono); margin-top: 3px; }
+    .pf-stat { background: var(--ink); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--line); }
+    .pf-stat-lbl { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--gray-dim); margin-bottom: 5px; }
+    .pf-stat-val { font-family: var(--mono); font-size: 15px; font-weight: 500; color: var(--white); }
+    .pf-stat-prior { font-family: var(--mono); font-size: 10px; margin-top: 3px; }
 
-    /* ── Alerts ── */
-    .warn { background: #fdf8ed; border: 1px solid rgba(180,140,0,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #7a5c00; margin-top: 10px; }
-    .err  { background: rgba(217,64,64,.07); border: 1px solid rgba(217,64,64,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--err); margin-top: 10px; }
-    .rst-btn { font-size: 11px; padding: 4px 12px; border: 1px solid var(--b2); border-radius: 20px; background: var(--s1); cursor: pointer; color: var(--t2); transition: background .1s; font-family: var(--sans); }
-    .rst-btn:hover { background: var(--s2); }
-    .hint-box { font-size: 10px; color: var(--t3); background: var(--s2); border-radius: 8px; padding: 8px 12px; margin-top: 10px; font-family: var(--mono); line-height: 1.8; border: 1px solid var(--b1); }
+    /* Buttons & alerts */
+    .rst-btn { font-family: var(--sans); font-size: 11px; padding: 5px 14px; border: 1px solid var(--line); border-radius: 20px; background: transparent; cursor: pointer; color: var(--gray); transition: color .12s, border-color .12s; }
+    .rst-btn:hover { color: var(--white); border-color: rgba(255,255,255,.35); }
+    .warn { background: rgba(200,160,0,.1); border: 1px solid rgba(200,160,0,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: var(--sans); color: #e8c840; margin-top: 10px; }
+    .err  { background: rgba(240,82,82,.1); border: 1px solid rgba(240,82,82,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: var(--sans); color: var(--red); margin-top: 10px; }
+    .hint-box { font-family: var(--mono); font-size: 10px; color: var(--gray-dim); background: var(--ink); border-radius: 8px; padding: 9px 13px; margin-top: 10px; line-height: 1.9; border: 1px solid var(--line); }
+
+    /* App title */
+    #app-title { font-family: var(--sans); font-size: 20px; font-weight: 700; color: var(--white); letter-spacing: .04em; text-transform: uppercase; }
+
+    /* Results headers */
+    .results-title { font-family: var(--sans); font-size: 17px; font-weight: 600; color: var(--white); }
+    .results-sub   { font-family: var(--mono); font-size: 11px; color: var(--gray-dim); margin-top: 4px; }
+
+    /* Dropzone text */
+    .dz-title { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+    .dz-sub   { font-family: var(--sans); font-size: 11px; color: var(--gray-dim); }
+
+    /* Filter input */
+    .filter-input { font-family: var(--sans); font-size: 11px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 20px; background: var(--ink); color: var(--white); width: 160px; outline: none; transition: border-color .12s; }
+    .filter-input:focus { border-color: rgba(255,255,255,.4); }
+    .filter-input::placeholder { color: var(--gray-dim); }
+
+    /* Upload descriptions */
+    .upload-desc     { font-family: var(--sans); font-size: 13px; color: var(--gray); }
+    .upload-desc-sub { font-family: var(--sans); font-size: 12px; color: var(--gray-dim); }
 
     @media (max-width: 600px) { .g3 { grid-template-columns: repeat(2,1fr); } .pf-stats { grid-template-columns: repeat(2,1fr); } .g2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
+<div class="grain"></div>
 <div class="container">
 
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-    <p style="font-size:20px;font-weight:600;font-family:var(--sans);letter-spacing:-.01em" id="app-title">PLTFRM</p>
+    <p id="app-title">PLTFRM</p>
   </div>
   <div class="top-nav">
     <button class="tnav on" id="tnav-campaigns" onclick="switchSection('campaigns')">Campaigns</button>
@@ -228,19 +209,19 @@
   <!-- ═══ CAMPAIGNS ═══ -->
   <div id="section-campaigns">
     <div id="c-upload-view">
-      <p style="font-size:13px;color:var(--t2);font-family:var(--sans);margin-bottom:1rem">Upload prior week first, then current week.</p>
+      <p class="upload-desc" style="margin-bottom:1rem">Upload prior week first, then current week.</p>
       <div class="g2">
         <div class="dz" id="c-dz-prior" onclick="document.getElementById('c-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();cLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="c-f-prior" accept=".csv" style="display:none" onchange="cLoad('prior',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📅</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="c-lbl-prior">Prior week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="c-lbl-prior">Prior week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="c-dz-cur" onclick="document.getElementById('c-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();cLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="c-f-cur" accept=".csv" style="display:none" onchange="cLoad('cur',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📊</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="c-lbl-cur">Current week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="c-lbl-cur">Current week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
       </div>
     </div>
@@ -248,8 +229,8 @@
     <div id="c-results-view" style="display:none;padding-bottom:2rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.25rem">
         <div>
-          <p style="font-size:17px;font-weight:600;font-family:var(--sans)" id="c-brand-display"></p>
-          <p style="font-size:11px;color:var(--t3);margin-top:3px;font-family:var(--mono)" id="c-results-sub"></p>
+          <p class="results-title" id="c-brand-display"></p>
+          <p class="results-sub" id="c-results-sub"></p>
         </div>
         <button class="rst-btn" onclick="cReset()">↺ Reset</button>
       </div>
@@ -308,6 +289,28 @@
             <div class="mc-val" id="c-auto-spend-cur">—</div>
             <div class="mc-prior" id="c-auto-spend-prior"></div>
             <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-auto-spend-pct">—</div>
+          </div>
+        </div>
+
+        <div class="slbl" style="margin-top:12px">Targeting type (manual)</div>
+        <div class="g3">
+          <div class="metric-card">
+            <div class="mc-lbl">Exact spend</div>
+            <div class="mc-val" id="c-exact-spend-cur">—</div>
+            <div class="mc-prior" id="c-exact-spend-prior"></div>
+            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-exact-spend-pct">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-lbl">Phrase spend</div>
+            <div class="mc-val" id="c-phrase-spend-cur">—</div>
+            <div class="mc-prior" id="c-phrase-spend-prior"></div>
+            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-phrase-spend-pct">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="mc-lbl">Broad spend</div>
+            <div class="mc-val" id="c-broad-spend-cur">—</div>
+            <div class="mc-prior" id="c-broad-spend-prior"></div>
+            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-broad-spend-pct">—</div>
           </div>
         </div>
       </div>
@@ -372,20 +375,20 @@
   <!-- ═══ PRODUCTS ═══ -->
   <div id="section-asins" style="display:none">
     <div id="a-upload-view">
-      <p style="font-size:13px;color:var(--t2);font-family:var(--sans);margin-bottom:4px">Upload your product performance reports.</p>
-      <p style="font-size:12px;color:var(--t3);margin-bottom:1rem">Prior week first, then current week.</p>
+      <p class="upload-desc" style="margin-bottom:4px">Upload your product performance reports.</p>
+      <p class="upload-desc-sub" style="margin-bottom:1rem">Prior week first, then current week.</p>
       <div class="g2">
         <div class="dz" id="a-dz-prior" onclick="document.getElementById('a-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="a-f-prior" accept=".csv" style="display:none" onchange="aLoad('prior',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📅</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="a-lbl-prior">Prior week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="a-lbl-prior">Prior week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="a-dz-cur" onclick="document.getElementById('a-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="a-f-cur" accept=".csv" style="display:none" onchange="aLoad('cur',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📊</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="a-lbl-cur">Current week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="a-lbl-cur">Current week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
       </div>
     </div>
@@ -393,8 +396,8 @@
     <div id="a-results-view" style="display:none;padding-bottom:2rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div>
-          <p style="font-size:17px;font-weight:600;font-family:var(--sans)">Product performance</p>
-          <p style="font-size:11px;color:var(--t3);margin-top:3px;font-family:var(--mono)" id="a-sub"></p>
+          <p class="results-title">Product performance</p>
+          <p class="results-sub" id="a-sub"></p>
         </div>
         <button class="rst-btn" onclick="aReset()">↺ Reset</button>
       </div>
@@ -446,20 +449,20 @@
   <!-- ═══ BUSINESS REPORT ═══ -->
   <div id="section-biz" style="display:none">
     <div id="b-upload-view">
-      <p style="font-size:13px;color:var(--t2);font-family:var(--sans);margin-bottom:4px">Upload Amazon Business Reports (Sales & Traffic by ASIN).</p>
-      <p style="font-size:12px;color:var(--t3);margin-bottom:1rem">Prior week first, then current week. Shows implied price, sessions, Buy Box %, and organic CVR per ASIN.</p>
+      <p class="upload-desc" style="margin-bottom:4px">Upload Amazon Business Reports (Sales & Traffic by ASIN).</p>
+      <p class="upload-desc-sub" style="margin-bottom:1rem">Prior week first, then current week. Shows implied price, sessions, Buy Box %, and organic CVR per ASIN.</p>
       <div class="g2">
         <div class="dz" id="b-dz-prior" onclick="document.getElementById('b-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();bLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="b-f-prior" accept=".csv" style="display:none" onchange="bLoad('prior',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📅</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="b-lbl-prior">Prior week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="b-lbl-prior">Prior week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="b-dz-cur" onclick="document.getElementById('b-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();bLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="b-f-cur" accept=".csv" style="display:none" onchange="bLoad('cur',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📊</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="b-lbl-cur">Current week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="b-lbl-cur">Current week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
       </div>
     </div>
@@ -467,8 +470,8 @@
     <div id="b-results-view" style="display:none;padding-bottom:2rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div>
-          <p style="font-size:17px;font-weight:600;font-family:var(--sans)">Business report — ASIN summary</p>
-          <p style="font-size:11px;color:var(--t3);margin-top:3px;font-family:var(--mono)" id="b-sub"></p>
+          <p class="results-title">Business report — ASIN summary</p>
+          <p class="results-sub" id="b-sub"></p>
         </div>
         <button class="rst-btn" onclick="bReset()">↺ Reset</button>
       </div>
@@ -527,20 +530,20 @@
   <!-- ═══ SEARCH QUERY PERFORMANCE ═══ -->
   <div id="section-sqp" style="display:none">
     <div id="s-upload-view">
-      <p style="font-size:13px;color:var(--t2);font-family:var(--sans);margin-bottom:4px">Upload Search Query Performance (Brand View) reports.</p>
-      <p style="font-size:12px;color:var(--t3);margin-bottom:1rem">Prior week first, then current week. Compares search volume, brand share, purchases, and more per query.</p>
+      <p class="upload-desc" style="margin-bottom:4px">Upload Search Query Performance (Brand View) reports.</p>
+      <p class="upload-desc-sub" style="margin-bottom:1rem">Prior week first, then current week. Compares search volume, brand share, purchases, and more per query.</p>
       <div class="g2">
         <div class="dz" id="s-dz-prior" onclick="document.getElementById('s-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();sLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="s-f-prior" accept=".csv" style="display:none" onchange="sLoad('prior',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📅</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="s-lbl-prior">Prior week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="s-lbl-prior">Prior week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="s-dz-cur" onclick="document.getElementById('s-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();sLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="s-f-cur" accept=".csv" style="display:none" onchange="sLoad('cur',this.files[0])">
           <div style="font-size:20px;margin-bottom:8px">📊</div>
-          <div style="font-size:13px;font-weight:600;margin-bottom:3px;font-family:var(--sans)" id="s-lbl-cur">Current week</div>
-          <div style="font-size:11px;color:var(--t2)">Drop CSV or click to browse</div>
+          <div class="dz-title" id="s-lbl-cur">Current week</div>
+          <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
       </div>
     </div>
@@ -548,8 +551,8 @@
     <div id="s-results-view" style="display:none;padding-bottom:2rem">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div>
-          <p style="font-size:17px;font-weight:600;font-family:var(--sans)">Search query performance</p>
-          <p style="font-size:11px;color:var(--t3);margin-top:3px;font-family:var(--mono)" id="s-sub"></p>
+          <p class="results-title">Search query performance</p>
+          <p class="results-sub" id="s-sub"></p>
         </div>
         <button class="rst-btn" onclick="sReset()">↺ Reset</button>
       </div>
@@ -557,7 +560,7 @@
       <!-- Search filter -->
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
         <input type="text" id="s-search" placeholder="Filter queries…" oninput="sRenderTable()"
-          style="font-size:11px;padding:5px 12px;border:1px solid var(--b2);border-radius:20px;background:var(--bg);color:var(--t1);width:160px;outline:none;font-family:var(--sans)">
+          class="filter-input">
       </div>
 
       <div class="tbl-wrap">
@@ -697,15 +700,21 @@ function cExtract(res){
   const cc=findCol(h,['clicks'],[]);
   const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
   const ic=findCol(h,['impressions'],[]);
-  const isAuto=n=>(n||'').toLowerCase().includes('| auto |')||/\|\s*auto\s*\|/i.test(n||'');
+  const isAuto=n=>/\|\s*auto\s*\|/i.test(n||'');
+  const isExact=n=>/\bexact\b/i.test(n||'');
+  const isPhrase=n=>/\bphrase\b/i.test(n||'');
+  const isBroad=n=>/\bbroad\b/i.test(n||'');
   const brand=detectBrand(rows,nc);
   const seg={all:{cl:0,or:0,sp:0,rv:0},b:{cl:0,or:0,sp:0,rv:0},nb:{cl:0,or:0,sp:0,rv:0}};
-  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0,autoSp=0;const by={};
+  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0,autoSp=0,exactSp=0,phraseSp=0,broadSp=0;const by={};
   for(const row of rows){
     const name=nc?(row[nc]||'').trim():'';if(!name)continue;
     const cl=pn(row[cc]),or=pn(row[oc]),sp=pn(row[sc]),rv=pn(row[rc]),im=pn(row[ic]);
     tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;tIm+=im;
     if(isAuto(name))autoSp+=sp;
+    if(isExact(name))exactSp+=sp;
+    if(isPhrase(name))phraseSp+=sp;
+    if(isBroad(name))broadSp+=sp;
     seg.all.cl+=cl;seg.all.or+=or;seg.all.sp+=sp;seg.all.rv+=rv;
     if(isB(name)){seg.b.cl+=cl;seg.b.or+=or;seg.b.sp+=sp;seg.b.rv+=rv;}
     if(isNB(name)){seg.nb.cl+=cl;seg.nb.or+=or;seg.nb.sp+=sp;seg.nb.rv+=rv;}
@@ -715,7 +724,7 @@ function cExtract(res){
   for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.roas=c.sp>0?c.rv/c.sp:null;c.pf=getPf(c.name);}
   const roas=s=>s.sp>0?s.rv/s.sp:null,cvr=s=>s.cl>0?(s.or/s.cl)*100:null,cpc=s=>s.cl>0?s.sp/s.cl:null;
   const ns=rows.map(r=>nc?(r[nc]||''):'');
-  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,autoSp,sc,rc,cc,oc,ic,brand,
+  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,autoSp,exactSp,phraseSp,broadSp,sc,rc,cc,oc,ic,brand,
     all:{...seg.all,roas:roas(seg.all),cvr:cvr(seg.all)},
     b:{...seg.b,roas:roas(seg.b),cvr:cvr(seg.b),cpc:cpc(seg.b),cnt:ns.filter(isB).length},
     nb:{...seg.nb,roas:roas(seg.nb),cvr:cvr(seg.nb),cpc:cpc(seg.nb),cnt:ns.filter(isNB).length},by};
@@ -846,10 +855,16 @@ function cRenderResults(){
   rCard('c-b-spend-cur', 'c-b-spend-prior',  cur.b.sp,   prior.b.sp,   f$,0);
   rCard('c-nb-spend-cur','c-nb-spend-prior',  cur.nb.sp,  prior.nb.sp,  f$,0);
   rCard('c-auto-spend-cur','c-auto-spend-prior',cur.autoSp,prior.autoSp,f$,0);
+  rCard('c-exact-spend-cur','c-exact-spend-prior',cur.exactSp,prior.exactSp,f$,0);
+  rCard('c-phrase-spend-cur','c-phrase-spend-prior',cur.phraseSp,prior.phraseSp,f$,0);
+  rCard('c-broad-spend-cur','c-broad-spend-prior',cur.broadSp,prior.broadSp,f$,0);
   const spPct=(sp,total)=>total>0?(sp/total*100).toFixed(1)+'% of spend':'—';
   document.getElementById('c-b-spend-pct').textContent   =spPct(cur.b.sp,  cur.sp);
   document.getElementById('c-nb-spend-pct').textContent  =spPct(cur.nb.sp, cur.sp);
   document.getElementById('c-auto-spend-pct').textContent=spPct(cur.autoSp,cur.sp);
+  document.getElementById('c-exact-spend-pct').textContent =spPct(cur.exactSp, cur.sp);
+  document.getElementById('c-phrase-spend-pct').textContent=spPct(cur.phraseSp,cur.sp);
+  document.getElementById('c-broad-spend-pct').textContent =spPct(cur.broadSp, cur.sp);
   cRenderTable();cRenderPfs();
   initScrollMirror('c-scroll-mirror','c-tbl-wrap');
   // Init resize handle after table is in DOM
