@@ -63,6 +63,12 @@
     .mc-lbl { font-family: var(--mono); font-size: 9px; font-weight: 500; color: var(--gray-dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
     .mc-val { font-family: var(--mono); font-size: 26px; font-weight: 500; color: var(--white); line-height: 1; }
     .mc-prior { font-family: var(--mono); font-size: 11px; margin-top: 7px; }
+  .alloc-pct {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    color: var(--white); margin-top: 10px; padding: 5px 10px;
+    background: rgba(255,255,255,.06); border: 1px solid var(--line);
+    border-radius: 6px; display: inline-block;
+  }
 
     /* Badges */
     .seg-badge { display: inline-block; font-family: var(--mono); font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--gray); background: rgba(255,255,255,.04); }
@@ -276,41 +282,19 @@
             <div class="mc-lbl">Branded spend <span class="seg-badge badge-b">| b |</span></div>
             <div class="mc-val" id="c-b-spend-cur">—</div>
             <div class="mc-prior" id="c-b-spend-prior"></div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-b-spend-pct">—</div>
+            <div class="alloc-pct" id="c-b-spend-pct">—</div>
           </div>
           <div class="metric-card">
             <div class="mc-lbl">NB spend <span class="seg-badge badge-nb">| nb |</span></div>
             <div class="mc-val" id="c-nb-spend-cur">—</div>
             <div class="mc-prior" id="c-nb-spend-prior"></div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-nb-spend-pct">—</div>
+            <div class="alloc-pct" id="c-nb-spend-pct">—</div>
           </div>
           <div class="metric-card">
             <div class="mc-lbl">Auto spend</div>
             <div class="mc-val" id="c-auto-spend-cur">—</div>
             <div class="mc-prior" id="c-auto-spend-prior"></div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-auto-spend-pct">—</div>
-          </div>
-        </div>
-
-        <div class="slbl" style="margin-top:12px">Targeting type (manual)</div>
-        <div class="g3">
-          <div class="metric-card">
-            <div class="mc-lbl">Exact spend</div>
-            <div class="mc-val" id="c-exact-spend-cur">—</div>
-            <div class="mc-prior" id="c-exact-spend-prior"></div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-exact-spend-pct">—</div>
-          </div>
-          <div class="metric-card">
-            <div class="mc-lbl">Phrase spend</div>
-            <div class="mc-val" id="c-phrase-spend-cur">—</div>
-            <div class="mc-prior" id="c-phrase-spend-prior"></div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-phrase-spend-pct">—</div>
-          </div>
-          <div class="metric-card">
-            <div class="mc-lbl">Broad spend</div>
-            <div class="mc-val" id="c-broad-spend-cur">—</div>
-            <div class="mc-prior" id="c-broad-spend-prior"></div>
-            <div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:4px" id="c-broad-spend-pct">—</div>
+            <div class="alloc-pct" id="c-auto-spend-pct">—</div>
           </div>
         </div>
       </div>
@@ -701,20 +685,14 @@ function cExtract(res){
   const oc=findCol(h,['purchases','7 day total orders (#)','14 day total orders (#)','7 day total orders','14 day total orders','total orders (#)','total orders','orders (#)','orders','units ordered'],['new-to-brand','new to brand']);
   const ic=findCol(h,['impressions'],[]);
   const isAuto=n=>/\|\s*auto\s*\|/i.test(n||'');
-  const isExact=n=>/\bexact\b/i.test(n||'');
-  const isPhrase=n=>/\bphrase\b/i.test(n||'');
-  const isBroad=n=>/\bbroad\b/i.test(n||'');
   const brand=detectBrand(rows,nc);
   const seg={all:{cl:0,or:0,sp:0,rv:0},b:{cl:0,or:0,sp:0,rv:0},nb:{cl:0,or:0,sp:0,rv:0}};
-  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0,autoSp=0,exactSp=0,phraseSp=0,broadSp=0;const by={};
+  let tSp=0,tRv=0,tCl=0,tOr=0,tIm=0,autoSp=0;const by={};
   for(const row of rows){
     const name=nc?(row[nc]||'').trim():'';if(!name)continue;
     const cl=pn(row[cc]),or=pn(row[oc]),sp=pn(row[sc]),rv=pn(row[rc]),im=pn(row[ic]);
     tSp+=sp;tRv+=rv;tCl+=cl;tOr+=or;tIm+=im;
     if(isAuto(name))autoSp+=sp;
-    if(isExact(name))exactSp+=sp;
-    if(isPhrase(name))phraseSp+=sp;
-    if(isBroad(name))broadSp+=sp;
     seg.all.cl+=cl;seg.all.or+=or;seg.all.sp+=sp;seg.all.rv+=rv;
     if(isB(name)){seg.b.cl+=cl;seg.b.or+=or;seg.b.sp+=sp;seg.b.rv+=rv;}
     if(isNB(name)){seg.nb.cl+=cl;seg.nb.or+=or;seg.nb.sp+=sp;seg.nb.rv+=rv;}
@@ -724,7 +702,7 @@ function cExtract(res){
   for(const c of Object.values(by)){c.cvr=c.cl>0?(c.or/c.cl)*100:null;c.cpc=c.cl>0?c.sp/c.cl:null;c.roas=c.sp>0?c.rv/c.sp:null;c.pf=getPf(c.name);}
   const roas=s=>s.sp>0?s.rv/s.sp:null,cvr=s=>s.cl>0?(s.or/s.cl)*100:null,cpc=s=>s.cl>0?s.sp/s.cl:null;
   const ns=rows.map(r=>nc?(r[nc]||''):'');
-  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,autoSp,exactSp,phraseSp,broadSp,sc,rc,cc,oc,ic,brand,
+  return{sp:tSp,rv:tRv,cl:tCl,or:tOr,im:tIm,autoSp,sc,rc,cc,oc,ic,brand,
     all:{...seg.all,roas:roas(seg.all),cvr:cvr(seg.all)},
     b:{...seg.b,roas:roas(seg.b),cvr:cvr(seg.b),cpc:cpc(seg.b),cnt:ns.filter(isB).length},
     nb:{...seg.nb,roas:roas(seg.nb),cvr:cvr(seg.nb),cpc:cpc(seg.nb),cnt:ns.filter(isNB).length},by};
@@ -855,16 +833,10 @@ function cRenderResults(){
   rCard('c-b-spend-cur', 'c-b-spend-prior',  cur.b.sp,   prior.b.sp,   f$,0);
   rCard('c-nb-spend-cur','c-nb-spend-prior',  cur.nb.sp,  prior.nb.sp,  f$,0);
   rCard('c-auto-spend-cur','c-auto-spend-prior',cur.autoSp,prior.autoSp,f$,0);
-  rCard('c-exact-spend-cur','c-exact-spend-prior',cur.exactSp,prior.exactSp,f$,0);
-  rCard('c-phrase-spend-cur','c-phrase-spend-prior',cur.phraseSp,prior.phraseSp,f$,0);
-  rCard('c-broad-spend-cur','c-broad-spend-prior',cur.broadSp,prior.broadSp,f$,0);
   const spPct=(sp,total)=>total>0?(sp/total*100).toFixed(1)+'% of spend':'—';
   document.getElementById('c-b-spend-pct').textContent   =spPct(cur.b.sp,  cur.sp);
   document.getElementById('c-nb-spend-pct').textContent  =spPct(cur.nb.sp, cur.sp);
   document.getElementById('c-auto-spend-pct').textContent=spPct(cur.autoSp,cur.sp);
-  document.getElementById('c-exact-spend-pct').textContent =spPct(cur.exactSp, cur.sp);
-  document.getElementById('c-phrase-spend-pct').textContent=spPct(cur.phraseSp,cur.sp);
-  document.getElementById('c-broad-spend-pct').textContent =spPct(cur.broadSp, cur.sp);
   cRenderTable();cRenderPfs();
   initScrollMirror('c-scroll-mirror','c-tbl-wrap');
   // Init resize handle after table is in DOM
