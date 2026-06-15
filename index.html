@@ -165,8 +165,8 @@
     /* Buttons & alerts */
     .rst-btn { font-family: var(--sans); font-size: 11px; padding: 5px 14px; border: 1px solid var(--line); border-radius: 20px; background: transparent; cursor: pointer; color: var(--gray); transition: color .12s, border-color .12s; }
     .rst-btn:hover { color: var(--white); border-color: rgba(255,255,255,.35); }
-    .warn { background: rgba(200,160,0,.1); border: 1px solid rgba(200,160,0,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: var(--sans); color: #e8c840; margin-top: 10px; }
-    .err  { background: rgba(240,82,82,.1); border: 1px solid rgba(240,82,82,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: var(--sans); color: var(--red); margin-top: 10px; }
+    .warn { background: rgba(200,160,0,.1); border: 1px solid rgba(200,160,0,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: var(--sans); color: #e8c840; margin-top: 10px; display: flex; align-items: center; }
+    .err  { background: rgba(240,82,82,.1); border: 1px solid rgba(240,82,82,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: var(--sans); color: var(--red); margin-top: 10px; display: flex; align-items: center; }
     .hint-box { font-family: var(--mono); font-size: 10px; color: var(--gray-dim); background: var(--ink); border-radius: 8px; padding: 9px 13px; margin-top: 10px; line-height: 1.9; border: 1px solid var(--line); }
 
     /* App title */
@@ -213,13 +213,13 @@
       <div class="g2">
         <div class="dz" id="c-dz-prior" onclick="document.getElementById('c-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();cLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="c-f-prior" accept=".csv" style="display:none" onchange="cLoad('prior',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <div class="dz-title" id="c-lbl-prior">Prior week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="c-dz-cur" onclick="document.getElementById('c-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();cLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="c-f-cur" accept=".csv" style="display:none" onchange="cLoad('cur',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><path d="M3 21V3"/><path d="M3 21h18"/><path d="M7 17V10M12 17V6M17 17v-4"/></svg>
           <div class="dz-title" id="c-lbl-cur">Current week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
@@ -380,13 +380,13 @@
       <div class="g2">
         <div class="dz" id="a-dz-prior" onclick="document.getElementById('a-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="a-f-prior" accept=".csv" style="display:none" onchange="aLoad('prior',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <div class="dz-title" id="a-lbl-prior">Prior week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="a-dz-cur" onclick="document.getElementById('a-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();aLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="a-f-cur" accept=".csv" style="display:none" onchange="aLoad('cur',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><path d="M3 21V3"/><path d="M3 21h18"/><path d="M7 17V10M12 17V6M17 17v-4"/></svg>
           <div class="dz-title" id="a-lbl-cur">Current week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
@@ -454,13 +454,13 @@
       <div class="g2">
         <div class="dz" id="b-dz-prior" onclick="document.getElementById('b-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();bLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="b-f-prior" accept=".csv" style="display:none" onchange="bLoad('prior',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <div class="dz-title" id="b-lbl-prior">Prior week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="b-dz-cur" onclick="document.getElementById('b-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();bLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="b-f-cur" accept=".csv" style="display:none" onchange="bLoad('cur',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><path d="M3 21V3"/><path d="M3 21h18"/><path d="M7 17V10M12 17V6M17 17v-4"/></svg>
           <div class="dz-title" id="b-lbl-cur">Current week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
@@ -535,13 +535,13 @@
       <div class="g2">
         <div class="dz" id="s-dz-prior" onclick="document.getElementById('s-f-prior').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();sLoad('prior',event.dataTransfer.files[0])">
           <input type="file" id="s-f-prior" accept=".csv" style="display:none" onchange="sLoad('prior',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <div class="dz-title" id="s-lbl-prior">Prior week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
         <div class="dz" id="s-dz-cur" onclick="document.getElementById('s-f-cur').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();sLoad('cur',event.dataTransfer.files[0])">
           <input type="file" id="s-f-cur" accept=".csv" style="display:none" onchange="sLoad('cur',this.files[0])">
-          <div style="font-size:20px;margin-bottom:8px">📊</div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;color:var(--gray-dim)"><path d="M3 21V3"/><path d="M3 21h18"/><path d="M7 17V10M12 17V6M17 17v-4"/></svg>
           <div class="dz-title" id="s-lbl-cur">Current week</div>
           <div class="dz-sub">Drop CSV or click to browse</div>
         </div>
@@ -870,7 +870,7 @@ function cRenderResults(){
   // Init resize handle after table is in DOM
   initResize('c-resize-handle','c-th-name','c-camp-tbl','--cname-w',220);
   const w=[];if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected.`});if(!cur.oc)w.push({t:'err',m:`Orders column not detected.`});if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0.`});if(cur.b.cnt===0)w.push({t:'warn',m:`No "| b |" campaigns found.`});if(cur.nb.cnt===0)w.push({t:'warn',m:`No "| nb |" campaigns found.`});
-  document.getElementById('c-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
+  document.getElementById('c-warn-area').innerHTML=w.map(x=>`<div class="${x.t}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:6px;vertical-align:-1px;display:inline"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>${x.m}</div>`).join('');
   document.getElementById('c-upload-view').style.display='none';document.getElementById('c-results-view').style.display='';
 }
 function cReset(){
@@ -986,7 +986,7 @@ function aRenderResults(){
   if(!cur.rc)w.push({t:'warn',m:`Revenue column not detected. Expected "Sales(USD)".`});
   if(!cur.oc)w.push({t:'err',m:`Orders column not detected.`});
   if(cur.or===0&&cur.oc)w.push({t:'err',m:`Orders total to 0 despite detecting "${cur.oc}".`});
-  document.getElementById('a-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
+  document.getElementById('a-warn-area').innerHTML=w.map(x=>`<div class="${x.t}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:6px;vertical-align:-1px;display:inline"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>${x.m}</div>`).join('');
   document.getElementById('a-upload-view').style.display='none';
   document.getElementById('a-results-view').style.display='';
 }
@@ -1163,7 +1163,7 @@ function bRenderResults(){
   if(!cur.asinCol) w.push({t:'err', m:`ASIN column not found. Expected "(Child) ASIN".`});
   if(!cur.salesCol)w.push({t:'warn',m:`Sales column not found. Expected "Ordered Product Sales".`});
   if(!cur.sessCol) w.push({t:'warn',m:`Sessions column not found. Expected "Sessions - Total".`});
-  document.getElementById('b-warn-area').innerHTML=w.map(x=>`<div class="${x.t}">⚠ ${x.m}</div>`).join('');
+  document.getElementById('b-warn-area').innerHTML=w.map(x=>`<div class="${x.t}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:6px;vertical-align:-1px;display:inline"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>${x.m}</div>`).join('');
 
   document.getElementById('b-upload-view').style.display='none';
   document.getElementById('b-results-view').style.display='';
